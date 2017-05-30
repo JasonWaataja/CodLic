@@ -21,8 +21,6 @@
 
 #include <sys/stat.h>
 
-#include <ftw.h>
-
 codlic::Licensor::Licensor(std::shared_ptr<Options> options) : options{options}
 {
 }
@@ -52,15 +50,5 @@ std::vector<std::string>
 codlic::Licensor::get_files_in_dir(const std::string& dirpath)
 {
     std::vector<std::string> files;
-    auto nftw_func = [&files](const char *fpath, const struct stat*,
-        int typeflag, struct FTW*) {
-        if (typeflag == FTW_F)
-            files.push_back(std::string{fpath});
-    };
-    /*
-     * Return code is irrelevant here because any files that were added
-     * successfully should still be processed.
-     */
-    nftw(dirpath.c_str(), nftw_func, 30, 0);
     return files;
 }

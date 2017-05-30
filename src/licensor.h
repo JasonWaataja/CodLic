@@ -20,7 +20,10 @@
 #ifndef CODLIC_LICENSOR_H
 #define CODLIC_LICENSOR_H
 
+#include <sys/stat.h>
+
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -28,10 +31,19 @@
 
 namespace codlic {
 
+/*
+ * Modeled somewhat after the UNIX nftw function, but is designed to be used
+ * with a functor object. T is a functor object that when called with a const
+ * char* representing the path, and a stat* object for the path.
+ */
+template<typename T>
+void nftw(const std::string& path, T func);
+
 class Licensor {
 public:
     Licensor(std::shared_ptr<Options> options);
     void license();
+
 
 private:
     std::shared_ptr<Options> options;
@@ -39,12 +51,18 @@ private:
     /* Gets the list of files to operate on, following directories. */
     std::vector<std::string> get_files(const std::string& file);
     std::vector<std::string> get_files_in_dir(const std::string& dirpath);
-    int nftw_func = [&files](const char *fpath, const struct stat*,
-        int typeflag, struct FTW*) {
-        if (typeflag == FTW_F)
-            files.push_back(std::string{fpath});
-    };
 };
 } /* namespace codlic */
+
+template<typename T>
+void
+codlic::nftw(const std::string& path, T func)
+{
+    struct stat info;
+    if (stat(path.c_str(), &info) != 0)
+        throw std::runtime_error{"Failed to stat file or directory."};
+    if (!S_ISDIR(info.st_mode))
+        throw std::runtime_error{"Attempting to walk non-directory."};
+}
 
 #endif /* CODLIC_LICENSOR_H */
