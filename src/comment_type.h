@@ -17,26 +17,32 @@
  * along with CodLic.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cstdlib>
+#ifndef CODLIC_COMMENT_TYPE_H
+#define CODLIC_COMMENT_TYPE_H
 
-#include "licensor.h"
-#include "logging.h"
-#include "options.h"
+#include <string>
 
-int
-main(int argc, char *argv[])
-{
-    try {
-        auto options = std::shared_ptr<codlic::Options>(
-            new codlic::Options{argc, argv});
-        codlic::Licensor licensor{options};
-        licensor.license();
-    } catch (const std::exception& err) {
-        codlic::warn(err.what());
-        return EXIT_FAILURE;
-    } catch (...) {
-        codlic::warn("Unknown exception.");
-        return EXIT_FAILURE;
+namespace codlic {
+
+class CommentType {
+public:
+    enum CommentFamily {
+        SINGLE_DELIMITER,
+        OPENING_CLOSING_DELIMITER
     };
-    return EXIT_SUCCESS;
-}
+
+    CommentFamily family;
+
+    std::string single_delimiter = "#";
+    std::string opening_delimiter = "/*";
+    std::string closing_delimiter = " *";
+    std::string continuation_delimiter = " */";
+
+    explicit CommentType(const std::string& single_delimiter);
+    CommentType(const std::string& opening_delimiter,
+        const std::string& closing_delimiter,
+        const std::string continuation_delimiter);
+};
+} /* namespace codlic */
+
+#endif /* CODLIC_COMMENT_TYPE_H */

@@ -17,26 +17,15 @@
  * along with CodLic.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cstdlib>
+#ifndef CODLIC_LOGGING_H
+#define CODLIC_LOGGING_H
 
-#include "licensor.h"
-#include "logging.h"
-#include "options.h"
+#include <string>
 
-int
-main(int argc, char *argv[])
-{
-    try {
-        auto options = std::shared_ptr<codlic::Options>(
-            new codlic::Options{argc, argv});
-        codlic::Licensor licensor{options};
-        licensor.license();
-    } catch (const std::exception& err) {
-        codlic::warn(err.what());
-        return EXIT_FAILURE;
-    } catch (...) {
-        codlic::warn("Unknown exception.");
-        return EXIT_FAILURE;
-    };
-    return EXIT_SUCCESS;
-}
+namespace codlic {
+
+void warn(const char* message, ...);
+void warn(const std::string& message);
+} /* namespace codlic */
+
+#endif /* CODLIC_LOGGING_H */

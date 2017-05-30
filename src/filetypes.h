@@ -17,26 +17,24 @@
  * along with CodLic.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cstdlib>
+#ifndef CODLIC_FILETYPES_H
+#define CODLIC_FILETYPES_H
 
-#include "licensor.h"
-#include "logging.h"
-#include "options.h"
+#include <map>
+#include <string>
 
-int
-main(int argc, char *argv[])
-{
-    try {
-        auto options = std::shared_ptr<codlic::Options>(
-            new codlic::Options{argc, argv});
-        codlic::Licensor licensor{options};
-        licensor.license();
-    } catch (const std::exception& err) {
-        codlic::warn(err.what());
-        return EXIT_FAILURE;
-    } catch (...) {
-        codlic::warn("Unknown exception.");
-        return EXIT_FAILURE;
-    };
-    return EXIT_SUCCESS;
-}
+namespace codlic {
+
+const std::map<std::string, std::string>& filetype_map();
+
+class FiletypeMap {
+public:
+    FiletypeMap();
+    const std::map<std::string, std::string>& filetype_map();
+
+private:
+    std::map<std::string, std::string> map_data;
+};
+} /* namespace codlic */
+
+#endif /* CODLIC_FILES_H */

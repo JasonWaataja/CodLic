@@ -22,6 +22,11 @@
 
 #include <sys/stat.h>
 
+#include <dirent.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <functional>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -33,36 +38,75 @@ namespace codlic {
 
 /*
  * Modeled somewhat after the UNIX nftw function, but is designed to be used
- * with a functor object. T is a functor object that when called with a const
- * char* representing the path, and a stat* object for the path.
+ * with a functor object. T is a function object that when called with a const
+ * char* representing the path, and a stat* object for the path. The function
+ * object should return a boolean value. True indicates to continue processing
+ * entries and false indicates stopping.
+ *
+ * This function may throw a NftwError for a variety of reasons.
  */
-template<typename T>
-void nftw(const std::string& path, T func);
+void nftw(const std::string& path, std::function<bool(const char*,
+        const struct stat*)> func);
 
+/*
+ * Represents the object that does the licensing. There should be one of these
+ * per program.
+ */
 class Licensor {
 public:
-    Licensor(std::shared_ptr<Options> options);
+    explicit Licensor(std::shared_ptr<Options> options);
     void license();
-
 
 private:
     std::shared_ptr<Options> options;
 
     /* Gets the list of files to operate on, following directories. */
     std::vector<std::string> get_files(const std::string& file);
-    std::vector<std::string> get_files_in_dir(const std::string& dirpath);
+    /* Applies the correct operation to a file. */
+    void perform_on(const std::string& file);
+};
+
+/*
+ * A function object that finds files based on a set of options. This stores a
+ * pointer to the vector being operated on, so that object's lifetime must not
+ * end before this one.
+ */
+class FileFinder {
+public:
+    FileFinder(std::vector<std::string>& files,
+        std::shared_ptr<Options> options);
+    bool operator()(const char* path, const struct stat* info);
+
+private:
+    std::vector<std::string>* files;
+    std::shared_ptr<Options> options;
+};
+
+/*
+ * Wrapper for use with scandir. Its purpose is to use RAII to makes sure the
+ * directory entries are always freed.
+ */
+class ScandirInfo {
+public:
+    /* Scans path. Throws std::runtime_error upon failure. */
+    explicit ScandirInfo(const char* path);
+    ~ScandirInfo();
+    int size() const;
+    struct dirent** entries() const;
+
+private:
+    int entry_count = 0;
+    struct dirent** entry_data;
+};
+
+
+/* An error returned by the nftw function. */
+class NftwError : public std::runtime_error {
+public:
+    /* Initializes the message with strerror(errno). */
+    NftwError();
+    explicit NftwError(const char* what_arg);
 };
 } /* namespace codlic */
-
-template<typename T>
-void
-codlic::nftw(const std::string& path, T func)
-{
-    struct stat info;
-    if (stat(path.c_str(), &info) != 0)
-        throw std::runtime_error{"Failed to stat file or directory."};
-    if (!S_ISDIR(info.st_mode))
-        throw std::runtime_error{"Attempting to walk non-directory."};
-}
 
 #endif /* CODLIC_LICENSOR_H */

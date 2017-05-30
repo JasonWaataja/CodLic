@@ -28,18 +28,20 @@ codlic::Options::Options(int argc, char *argv[])
 {
     int option_index = 0;
     struct option long_options[]{
-        {"license-name", required_argument, NULL, 'l'},
-        {"license-file", required_argument, NULL, 'F'},
-        {"recursive", no_argument, NULL, 'r'},
-        {"filetype", required_argument, NULL, 'f'},
-        {"filetype-regex", required_argument, NULL, 'R'},
-        {"comment-string", required_argument, NULL, 'c'},
-        {"opening-comment-string", required_argument, NULL, 'o'},
-        {"closing-comment-string", required_argument, NULL, 'C'},
-        {"continuation-comment-string", required_argument, NULL, 'm'},
-        {0, 0, 0, 0}
+        {"license-name", required_argument, nullptr, 'l'},
+        {"license-file", required_argument, nullptr, 'F'},
+        {"recursive", no_argument, nullptr, 'r'},
+        {"filetype", required_argument, nullptr, 'f'},
+        {"filetype-regex", required_argument, nullptr, 'R'},
+        {"comment-type", required_argument, nullptr, 't'},
+        {"auto-determine-comment-type", no_argument, nullptr, 'a'},
+        {"comment-string", required_argument, nullptr, 'c'},
+        {"opening-comment-string", required_argument, nullptr, 'o'},
+        {"closing-comment-string", required_argument, nullptr, 'C'},
+        {"continuation-comment-string", required_argument, nullptr, 'm'},
+        {nullptr, 0, nullptr, 0}
     };
-    int c = getopt_long_only(argc, argv, "lFrfRcoCm:", long_options,
+    int c = getopt_long_only(argc, argv, "lFrfRtacoCm:", long_options,
         &option_index);
     while (c != -1) {
         switch (c) {
@@ -63,6 +65,13 @@ codlic::Options::Options(int argc, char *argv[])
         case 'R':
             has_filetype_regex = true;
             filetype_regex = optarg;
+            break;
+        case 't':
+            has_comment_type = true;
+            comment_type = optarg;
+            break;
+        case 'a':
+            should_auto_determine_comment_type = true;
             break;
         case 'c':
             has_comment_string = true;

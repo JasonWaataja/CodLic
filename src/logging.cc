@@ -17,26 +17,21 @@
  * along with CodLic.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cstdlib>
-
-#include "licensor.h"
 #include "logging.h"
-#include "options.h"
 
-int
-main(int argc, char *argv[])
+#include <err.h>
+
+void
+codlic::warn(const char *message, ...)
 {
-    try {
-        auto options = std::shared_ptr<codlic::Options>(
-            new codlic::Options{argc, argv});
-        codlic::Licensor licensor{options};
-        licensor.license();
-    } catch (const std::exception& err) {
-        codlic::warn(err.what());
-        return EXIT_FAILURE;
-    } catch (...) {
-        codlic::warn("Unknown exception.");
-        return EXIT_FAILURE;
-    };
-    return EXIT_SUCCESS;
+    va_list arglist;
+    va_start(arglist, message);
+    vwarnx(message, arglist);
+    va_end(arglist);
+};
+
+void
+codlic::warn(const std::string& message)
+{
+    warnx("%s", message.c_str());
 }

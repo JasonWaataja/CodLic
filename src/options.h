@@ -45,6 +45,7 @@ public:
     /* Name of built-in comment type such as "C", or "Lisp". */
     bool has_comment_type = false;
     std::string comment_type;
+    bool should_auto_determine_comment_type = false;
     /*
      * String for a line beginning comments. This is for filetypes such as
      * Python and Lisp that don't have both opening and closing comment string.
