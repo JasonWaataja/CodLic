@@ -43,7 +43,12 @@ std::string get_license_path(const std::string& license_name);
 
 class License {
 public:
-    License(const std::string& file_path);
+    explicit License(const std::string& file_path);
+
+    const std::string& get_license_file() const;
+
+private:
+    std::string license_file;
 };
 } /* namespace codlic */
 

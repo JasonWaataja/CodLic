@@ -22,13 +22,7 @@
 
 namespace codlic {
 
-const char* get_install_location();
+const char INSTALL_DIR[] = "@CMAKE_INSTALL_PREFIX@";
 } /* namespace codlic */
-
-const char*
-codlic::get_install_location()
-{
-    return @CMAKE_INSTALL_PREFIX@;
-}
 
 #endif /* CODLIC_CONFIG_H */

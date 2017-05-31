@@ -37,3 +37,26 @@ codlic::create_license_paths()
     path_data["mit"] = "mit";
     return path_data;
 }
+
+std::string
+codlic::get_license_path(const std::string& license_name)
+{
+    auto license_data = license_paths();
+    auto license_pos = license_data.find(license_name);
+    if (license_pos == license_data.end())
+        throw std::runtime_error("Unknown license name.");
+    std::string license_path = INSTALL_DIR;
+    license_path += "/" + license_pos->second;
+    return license_path;
+}
+
+codlic::License::License(const std::string& file_path)
+    : license_file{file_path}
+{
+}
+
+const std::string&
+codlic::License::get_license_file() const
+{
+    return license_file;
+}
