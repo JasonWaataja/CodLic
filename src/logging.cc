@@ -20,6 +20,7 @@
 #include "logging.h"
 
 #include <err.h>
+#include <stdarg.h>
 
 void
 codlic::warn(const char *message, ...)

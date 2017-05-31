@@ -21,12 +21,14 @@
 #define CODLIC_FILETYPES_H
 
 #include <map>
+#include <stdexcept>
 #include <string>
 
 namespace codlic {
 
 const std::map<std::string, std::string>& filetype_map();
 
+/* Class for storing a filetype map. Don't create an instance of this class. */
 class FiletypeMap {
 public:
     FiletypeMap();

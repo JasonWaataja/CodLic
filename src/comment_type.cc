@@ -19,6 +19,10 @@
 
 #include "comment_type.h"
 
+codlic::CommentType::CommentType() : family{SINGLE_DELIMITER}
+{
+}
+
 codlic::CommentType::CommentType(const std::string& single_delimiter)
     : family{SINGLE_DELIMITER}, single_delimiter{single_delimiter}
 {
@@ -27,8 +31,28 @@ codlic::CommentType::CommentType(const std::string& single_delimiter)
 codlic::CommentType::CommentType(const std::string& opening_delimiter,
     const std::string& closing_delimiter,
     const std::string& continuation_delimiter)
-    : opening_delimiter{opening_delimiter}
+    : family{OPENING_CLOSING_DELIMITER}
+    , opening_delimiter{opening_delimiter}
     , closing_delimiter{closing_delimiter}
-    , continuation_deliiter{continuation_delimiter}
+    , continuation_delimiter{continuation_delimiter}
 {
+}
+
+const std::map<std::string, codlic::CommentType>&
+codlic::comment_types()
+{
+    static CommentTypes types;
+    return types.comment_types();
+}
+
+codlic::CommentTypes::CommentTypes()
+{
+    comment_types_data["c"] = CommentType{"/*", " *", " */"};
+    comment_types_data["c++"] = CommentType{"//"};
+}
+
+const std::map<std::string, codlic::CommentType>&
+codlic::CommentTypes::comment_types()
+{
+    return comment_types_data;
 }

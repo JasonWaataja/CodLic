@@ -42,9 +42,39 @@ codlic::Licensor::license()
     }
 }
 
+codlic::CommentType
+codlic::Licensor::get_comment_type_for_file(const std::string& path)
+{
+    /*
+     * If a preset comment style is used, then use that one automatically.
+     * Next, if there is a single comment string, such as in Python or Bash,
+     * then use that automatically. Finally, fall back on using default opening
+     * and closing comments if needed.
+     */
+    if (options->has_comment_type) {
+        auto comment_types_data = comment_types();
+        auto comment_type_pos = comment_types_data.find(options->comment_type);
+        if (comment_type_pos == comment_types_data.end())
+            throw std::runtime_error{"Unknown comment type "
+                + options->comment_type};
+        return comment_type_pos->second;
+    }
+    if (options->has_comment_string)
+        return CommentType{options->comment_string};
+    CommentType type;
+    if (options->has_opening_comment_string)
+        type.opening_delimiter = options->opening_comment_string;
+    if (options->has_closing_comment_string)
+        type.closing_delimiter = options->closing_comment_string;
+    if (options->has_continuation_comment_string)
+        type.continuation_delimiter = options->continuation_comment_string;
+    return type;
+}
+
 void
 codlic::Licensor::perform_on(const std::string& file)
 {
+    CommentType type = get_comment_type_for_file(file);
 }
 
 std::vector<std::string>

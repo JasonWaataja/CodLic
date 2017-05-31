@@ -1,4 +1,5 @@
-set (SOURCES main.cc options.cc licensor.cc filetypes.cc logging.cc)
+set (SOURCES main.cc options.cc licensor.cc filetypes.cc logging.cc
+	comment_type.cc)
 add_executable (codlic ${SOURCES})
 set_property(TARGET codlic PROPERTY CXX_STANDARD 11)
 install (TARGETS codlic DESTINATION bin)

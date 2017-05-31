@@ -32,6 +32,7 @@
 #include <string>
 #include <vector>
 
+#include "comment_type.h"
 #include "options.h"
 
 namespace codlic {
@@ -56,6 +57,8 @@ class Licensor {
 public:
     explicit Licensor(std::shared_ptr<Options> options);
     void license();
+
+    CommentType get_comment_type_for_file(const std::string& path);
 
 private:
     std::shared_ptr<Options> options;

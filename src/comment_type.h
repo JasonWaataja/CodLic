@@ -20,6 +20,7 @@
 #ifndef CODLIC_COMMENT_TYPE_H
 #define CODLIC_COMMENT_TYPE_H
 
+#include <map>
 #include <string>
 
 namespace codlic {
@@ -33,15 +34,27 @@ public:
 
     CommentFamily family;
 
-    std::string single_delimiter = "#";
+    std::string single_delimiter = "//";
     std::string opening_delimiter = "/*";
     std::string closing_delimiter = " *";
     std::string continuation_delimiter = " */";
 
+    CommentType();
     explicit CommentType(const std::string& single_delimiter);
     CommentType(const std::string& opening_delimiter,
         const std::string& closing_delimiter,
-        const std::string continuation_delimiter);
+        const std::string& continuation_delimiter);
+};
+
+const std::map<std::string, CommentType>& comment_types();
+
+class CommentTypes {
+public:
+    CommentTypes();
+    const std::map<std::string, CommentType>& comment_types();
+
+private:
+    std::map<std::string, CommentType> comment_types_data;
 };
 } /* namespace codlic */
 
