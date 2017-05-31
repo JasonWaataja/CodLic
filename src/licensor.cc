@@ -17,6 +17,8 @@
  * along with CodLic.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
+
 #include "licensor.h"
 
 #include <sys/stat.h>

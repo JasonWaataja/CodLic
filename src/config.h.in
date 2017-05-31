@@ -17,23 +17,18 @@
  * along with CodLic.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
+#ifndef CODLIC_CONFIG_H
+#define CODLIC_CONFIG_H
 
-#include "filetypes.h"
+namespace codlic {
 
-std::map<std::string, std::string>
-codlic::create_filetype_map()
+const char* get_install_location();
+} /* namespace codlic */
+
+const char*
+codlic::get_install_location()
 {
-    std::map<std::string, std::string> map_data;
-    map_data["c"] = "*.c";
-    map_data["cpp"] = "*.cpp|*.cc|*.C";
-    map_data["c++"] = "*.cpp|*.cc|*.C";
-    return map_data;
+    return @CMAKE_INSTALL_PREFIX@;
 }
 
-const std::map<std::string, std::string>&
-codlic::filetype_map()
-{
-    static std::map<std::string, std::string> map_data = create_filetype_map();
-    return map_data;
-}
+#endif /* CODLIC_CONFIG_H */

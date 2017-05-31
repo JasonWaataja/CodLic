@@ -20,6 +20,8 @@
 #ifndef CODLIC_COMMENT_TYPE_H
 #define CODLIC_COMMENT_TYPE_H
 
+#include "config.h"
+
 #include <map>
 #include <string>
 

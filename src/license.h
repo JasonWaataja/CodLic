@@ -20,6 +20,8 @@
 #ifndef CODLIC_LICENSE_H
 #define CODLIC_LICENSE_H
 
+#include "config.h"
+
 #include <map>
 
 namespace codlic {
@@ -32,6 +34,12 @@ const std::map<std::string, std::string>& license_paths();
  * instance of an object created by this function.
  */
 std::map<std::string, std::string> create_license_paths();
+
+/*
+ * Uses license_paths() and the installation path to get the correct file
+ * location.
+ */
+std::string get_license_path(const std::string& license_name);
 
 class License {
 public:

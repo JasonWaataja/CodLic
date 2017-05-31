@@ -20,6 +20,8 @@
 #ifndef CODLIC_LICENSOR_H
 #define CODLIC_LICENSOR_H
 
+#include "config.h"
+
 #include <sys/stat.h>
 
 #include <dirent.h>

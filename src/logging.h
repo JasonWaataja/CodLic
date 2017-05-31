@@ -20,6 +20,8 @@
 #ifndef CODLIC_LOGGING_H
 #define CODLIC_LOGGING_H
 
+#include "config.h"
+
 #include <string>
 
 namespace codlic {

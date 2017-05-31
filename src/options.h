@@ -20,6 +20,8 @@
 #ifndef CODLIC_OPTIONS_H
 #define CODLIC_OPTIONS_H
 
+#include "config.h"
+
 #include <string>
 #include <vector>
 

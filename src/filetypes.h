@@ -20,6 +20,8 @@
 #ifndef CODLIC_FILETYPES_H
 #define CODLIC_FILETYPES_H
 
+#include "config.h"
+
 #include <map>
 #include <stdexcept>
 #include <string>
