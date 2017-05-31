@@ -41,18 +41,16 @@ codlic::CommentType::CommentType(const std::string& opening_delimiter,
 const std::map<std::string, codlic::CommentType>&
 codlic::comment_types()
 {
-    static CommentTypes types;
-    return types.comment_types();
+    static std::map<std::string, CommentType> comment_data =
+        create_comment_types();
+    return comment_data;
 }
 
-codlic::CommentTypes::CommentTypes()
+std::map<std::string, codlic::CommentType>
+codlic::create_comment_types()
 {
+    std::map<std::string, CommentType> comment_types_data;
     comment_types_data["c"] = CommentType{"/*", " *", " */"};
     comment_types_data["c++"] = CommentType{"//"};
-}
-
-const std::map<std::string, codlic::CommentType>&
-codlic::CommentTypes::comment_types()
-{
     return comment_types_data;
 }

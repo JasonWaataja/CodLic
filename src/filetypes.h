@@ -26,17 +26,15 @@
 
 namespace codlic {
 
+/* Get the map between filetypes and the regex that matches it. */
 const std::map<std::string, std::string>& filetype_map();
 
-/* Class for storing a filetype map. Don't create an instance of this class. */
-class FiletypeMap {
-public:
-    FiletypeMap();
-    const std::map<std::string, std::string>& filetype_map();
-
-private:
-    std::map<std::string, std::string> map_data;
-};
+/*
+ * Create the map between filetypes and the regex that matches it. Don't call
+ * this function, call filetype_map() instead because it stores a static
+ * instances of an object returned by this function.
+ */
+std::map<std::string, std::string> create_filetype_map();
 } /* namespace codlic */
 
 #endif /* CODLIC_FILES_H */

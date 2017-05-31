@@ -46,16 +46,14 @@ public:
         const std::string& continuation_delimiter);
 };
 
+/* Get the map of language names to objects for their comment types. */
 const std::map<std::string, CommentType>& comment_types();
 
-class CommentTypes {
-public:
-    CommentTypes();
-    const std::map<std::string, CommentType>& comment_types();
-
-private:
-    std::map<std::string, CommentType> comment_types_data;
-};
+/*
+ * Don't call this. Use comment_types() instead, it stores a static instance of
+ * an object create by this function.
+ */
+std::map<std::string, CommentType> create_comment_types();
 } /* namespace codlic */
 
 #endif /* CODLIC_COMMENT_TYPE_H */

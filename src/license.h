@@ -17,21 +17,26 @@
  * along with CodLic.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "filetypes.h"
+#ifndef CODLIC_LICENSE_H
+#define CODLIC_LICENSE_H
 
-std::map<std::string, std::string>
-codlic::create_filetype_map()
-{
-    std::map<std::string, std::string> map_data;
-    map_data["c"] = "*.c";
-    map_data["cpp"] = "*.cpp|*.cc|*.C";
-    map_data["c++"] = "*.cpp|*.cc|*.C";
-    return map_data;
-}
+#include <map>
 
-const std::map<std::string, std::string>&
-codlic::filetype_map()
-{
-    static std::map<std::string, std::string> map_data = create_filetype_map();
-    return map_data;
-}
+namespace codlic {
+
+/* Get a map of license names to paths where they are contained. */
+const std::map<std::string, std::string>& license_paths();
+
+/*
+ * Don't call this function. Call license_paths() instead. It returns a static
+ * instance of an object created by this function.
+ */
+std::map<std::string, std::string> create_license_paths();
+
+class License {
+public:
+    License(const std::string& file_path);
+};
+} /* namespace codlic */
+
+#endif /* CODLIC_LICENSE_H */

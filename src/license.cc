@@ -16,22 +16,3 @@
  * You should have received a copy of the GNU General Public License
  * along with CodLic.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include "filetypes.h"
-
-std::map<std::string, std::string>
-codlic::create_filetype_map()
-{
-    std::map<std::string, std::string> map_data;
-    map_data["c"] = "*.c";
-    map_data["cpp"] = "*.cpp|*.cc|*.C";
-    map_data["c++"] = "*.cpp|*.cc|*.C";
-    return map_data;
-}
-
-const std::map<std::string, std::string>&
-codlic::filetype_map()
-{
-    static std::map<std::string, std::string> map_data = create_filetype_map();
-    return map_data;
-}
