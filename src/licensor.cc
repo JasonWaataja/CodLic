@@ -25,6 +25,7 @@
 
 #include <err.h>
 
+#include <fstream>
 #include <regex>
 
 #include "filetypes.h"
@@ -42,6 +43,8 @@ codlic::Licensor::license()
         std::vector<std::string> arg_files = get_files(arg);
         files.insert(files.end(), arg_files.begin(), arg_files.end());
     }
+    for (const auto& file : files)
+        perform_on(file);
 }
 
 codlic::CommentType
@@ -76,7 +79,16 @@ codlic::Licensor::get_comment_type_for_file(const std::string& path)
 void
 codlic::Licensor::perform_on(const std::string& file)
 {
-    CommentType type = get_comment_type_for_file(file);
+    CommentType type{get_comment_type_for_file(file)};
+    License license{file};
+
+    std::vector<std::string> source_lines;
+    std::ifstream reader{file};
+    if (!reader.is_open())
+        throw std::runtime_error{"Failed to open file."};
+    std::string line;
+    while (std::getline(reader, line))
+        source_lines.push_back(line);
 }
 
 std::vector<std::string>

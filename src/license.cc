@@ -21,6 +21,8 @@
 
 #include "license.h"
 
+#include <fstream>
+
 const std::map<std::string, std::string>&
 codlic::license_paths()
 {
@@ -44,8 +46,8 @@ codlic::get_license_path(const std::string& license_name)
     auto license_data = license_paths();
     auto license_pos = license_data.find(license_name);
     if (license_pos == license_data.end())
-        throw std::runtime_error("Unknown license name.");
-    std::string license_path = INSTALL_DIR;
+        throw std::runtime_error{"Unknown license name."};
+    std::string license_path{INSTALL_DIR};
     license_path += "/" + license_pos->second;
     return license_path;
 }
@@ -59,4 +61,17 @@ const std::string&
 codlic::License::get_license_file() const
 {
     return license_file;
+}
+
+std::vector<std::string>
+codlic::License::get_license_lines() const
+{
+    std::ifstream reader{license_file};
+    if (!reader.is_open())
+        throw std::runtime_error{"Failed to read license file"};
+    std::vector<std::string> lines;
+    std::string line;
+    while (std::getline(reader, line))
+        lines.push_back(line);
+    return lines;
 }

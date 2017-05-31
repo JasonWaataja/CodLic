@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include <map>
+#include <vector>
 
 namespace codlic {
 
@@ -46,6 +47,7 @@ public:
     explicit License(const std::string& file_path);
 
     const std::string& get_license_file() const;
+    std::vector<std::string> get_license_lines() const;
 
 private:
     std::string license_file;
