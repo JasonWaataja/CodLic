@@ -3,7 +3,7 @@
 (in-package #:codlic)
 
 (defun make-license-table ()
-  (let ((license-table (make-hash-table :test #'equal)))
+  (let ((license-table (make-hash-table :test #'equalp)))
     ;; Some make-hash calls.
     license-table))
 

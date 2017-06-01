@@ -11,5 +11,5 @@
 	       (:file "files")
 	       (:file "filetypes")
 	       (:file "license")
+	       (:file "comments")
                (:file "codlic")))
-
