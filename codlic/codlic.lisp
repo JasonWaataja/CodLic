@@ -11,7 +11,7 @@
     ("auto-detect-comment-type" :none nil)
     ("single-comment-string" :required nil)
     ("opening-comment-string" :required nil)
-    ("closing-comment-string ie ioarsnt" :required nil)
+    ("closing-comment-string" :required nil)
     ("continuation-comment-string" :required nil)
     ("non-blank-first-line" :none "non-blank-first-line")))
 
@@ -56,13 +56,12 @@
      finally (return nil)))
 
 (defun get-composite-comment-type (options)
-  (let ((opening-string (progn (break) (assoc "opening-comment-string" options
-			       :test #'equal)))
-	(closing-string (progn (break) (assoc "closing-commment-string" options
-			       :test #'equal)))
+  (let ((opening-string (assoc "opening-comment-string" options
+			       :test #'equal))
+	(closing-string (assoc "closing-comment-string" options
+			       :test #'equal))
 	(continuation-string (assoc "continuation-comment-string" options
 				    :test #'equal)))
-    (break)
     (when (and opening-string closing-string continuation-string)
       (make-composite-comment-type (cdr opening-string)
 				   (cdr closing-string)
@@ -123,21 +122,22 @@ input-lines and license-lines are arrays and the return value is an array."
 	       input-lines))
 
 (defun add-license-lines (file license-lines options)
-  (let ((comment-type
-	 (fail-if-nil ((get-comment-type file options))
-		      'license-error
-		      :text "Failed to get comment type for file."))
-	(input-lines
-	 (fail-if-nil ((read-file-lines file))
-		      'license-error
-		      :text "Failed to read input file.")))
-    (fail-if-nil ((write-file-lines file
-				    (create-output-lines
-				     input-lines
-				     license-lines
-				     comment-type)))
-		 'license-error
-		 :text "Failed to write to file")))
+  (when (should-license-p file options)
+    (let ((comment-type
+	   (fail-if-nil ((get-comment-type file options))
+			'license-error
+			:text "Failed to get comment type for file."))
+	  (input-lines
+	   (fail-if-nil ((read-file-lines file))
+			'license-error
+			:text "Failed to read input file.")))
+      (fail-if-nil ((write-file-lines file
+				      (create-output-lines
+				       input-lines
+				       license-lines
+				       comment-type)))
+		   'license-error
+		   :text "Failed to write to file"))))
 
 (defun license-arg (arg options)
   "Licenses an argument based on the given options."

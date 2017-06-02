@@ -34,5 +34,6 @@
   "Checks if the file at pathspec matches the language specified by filetype."
   (let ((regex (get-filetype-regex filetype)))
     (if regex
-	(regex-matches-p regex pathspec)
+	;; Ensure it's not a pathname object.
+	(regex-matches-p regex (namestring pathspec))
 	nil)))
