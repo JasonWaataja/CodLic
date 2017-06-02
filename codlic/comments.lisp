@@ -59,7 +59,7 @@
   (let ((comment-types-table (make-hash-table :test #'equalp)))
     (setf (gethash "c" comment-types-table)
 	  (make-composite-comment-type "/*"
-				       "*/"
+				       " */"
 				       " *"))
     (setf (gethash "cpp" comment-types-table)
 	  (make-single-comment-type "//"))
