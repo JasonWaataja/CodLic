@@ -2,19 +2,73 @@
 
 (in-package #:codlic)
 
-(defun license-arg (arg options))
-
 (defparameter *cmd-options*
-  '(("license-name" :required nil)))
+  '(("license-name" :required nil)
+    ("license-file" :required nil)
+    ("filetype-language" :required nil)
+    ("filetype-regex" :required nil)
+    ("comment-language" :required nil)
+    ("auto-detect-comment-type" :none nil)
+    ("single-comment-string" :required nil)
+    ("opening-comment-string" :required nil)
+    ("closing-comment-string" :required nil)
+    ("continuation-comment-string" :required nil)
+    ("blank-first-line" :none "blank-first-line")))
+
+(defmacro acase ((cons-name alist &optional else-form) &rest test-forms)
+  "Switch statement for alists. For each test form, of the form (test-form
+  result-forms*), searches alist for test-form. In each case, if it is found,
+  then result-forms for that case are evaluated and returned. If no case matches
+  then else-form is evaluated and returned."
+  ;; This is formed by going through the test-forms in reverse. Since a
+  ;; consecutive cons won't work (assoc would have to be run twice), a series of
+  ;; consecutive let and if statements must be used, but since the last one must
+  ;; end in else-form it must be built in reverse.
+  (setf test-forms (nreverse test-forms))
+  (loop with final-form = '()
+     initially
+       (setf final-form
+	     `(let ((,cons-name (assoc ,(first (first test-forms)) ,alist)))
+		(if ,cons-name
+		    (progn ,@(rest (first test-forms)))
+		    ,else-form)))
+     for test-form in (rest test-forms) do
+       (setf final-form
+	     `(let ((,cons-name (assoc ,(first test-form) ,alist)))
+		(if ,cons-name
+		    (progn ,@(rest test-form))
+		    ,final-form)))
+     finally (return final-form)))
 
 (defun get-license (options)
   "Gets the correct license file for the given command line options"
-  nil)
+  (acase (name-cons options)
+    ("license-name" (gethash (cdr name-cons) *license-table*))
+    ("license-file" (cdr name-cons))))
 
-(defun get-comment-type (arg options)
+(defun comment-type-for-file (path)
+  (loop for language being the hash-keys in *comment-types-table*
+     using (hash-value comment-type)
+     if (file-matches-language-p path language)
+     return comment-type
+     finally (return nil)))
+
+(defun get-composite-comment-type (options)
+  (let ((opening-string (assoc "opening-comment-string" options))
+	(closing-string (assoc "closing-commment-string" options))
+	(continuation-string (assoc "closing-comment-string" options)))
+    (when (and opening-string closing-string continuation-string)
+      (make-composite-comment-type (cdr opening-string)
+				   (cdr closing-string)
+				   (cdr continuation-string)))))
+
+(defun get-comment-type (file options)
   "Gets the correct comment type based on the current argumet and previously
 passed arguments. This can change based on the arg if auto-detection is used."
-  nil)
+  (acase (comment-cons options (get-composite-comment-type options))
+    ("comment-language" (gethash (cdr comment-cons) *comment-types-table*))
+    ("auto-detect-comment-type" (comment-type-for-file file))
+    ("single-comment-string" (make-single-comment-type (cdr comment-cons)))))
 
 (defun walk-directory (dirpath func)
   (let ((wildpath (make-pathname :defaults (uiop:ensure-directory-pathname
@@ -30,26 +84,55 @@ passed arguments. This can change based on the arg if auto-detection is used."
   "Gets the list of files to operate on for the given argument and options. If
 it points to a file then the list just contains that file but if it is a
 directory then it recursively finds files in it."
-  (cond ((uiop:file-exists-p arg) (list arg))
-	((uiop:directory-exists-p arg)
-	 (let ((file-list '()))
-	   (walk-directory arg
-			  #'(lambda (entry)
-			      (when (uiop:file-exists-p entry)
-				(push entry file-list))))
-	   (nreverse file-list)))
-	(t nil)))
+  (if (uiop:directory-exists-p arg)
+      (let ((file-list '()))
+	(walk-directory arg
+			#'(lambda (entry)
+			    (when (uiop:file-exists-p entry)
+			      (push entry file-list))))
+	(nreverse file-list))
+      (list arg)))
+
+(defun create-output-lines (input-lines license-lines)
+  "Returns the array of lines to write to the file starting with the given
+license lines, then a blank line, and finally the set of input lines. Both
+input-lines and license-lines are arrays and the return value is an array."
+  (concatenate 'vector
+	       license-lines
+	       (list "")
+	       input-lines))
 
 (defun license-arg (arg options)
   "Licenses an argument based on the given options."
-  (let ((license-type (get-license options))
-	(comment-type (get-comment-type arg options))
+  (let ((license-file (get-license options))
 	(file-list (get-file-list arg options)))
-    (loop for file in file-list
-       for lines = (read-file-lines file)
-       when lines do
-	 (write-file-lines file
-			   (funcall comment-type license-type lines)))))
+    (fail-if-nil (license-file file-list)
+		 'license-error
+		 :text "Could not load license or file list for argument.")
+    (loop with license-lines = (read-file-lines license-file)
+       initially
+	 (fail-if-nil (license-lines)
+		      'license-error
+		      :text "Failed to read license file.")
+       for file in file-list
+       for comment-type =
+	 (fail-if-nil ((get-comment-type file options))
+		      'license-error
+		      :text "Failed to get comment type for file.")
+       for input-lines = (read-file-lines file) do
+	 (fail-if-nil (input-lines) 'license-error
+		      :text "Failed to read input file")
+	 (fail-if-nil ((write-file-lines file
+					 (create-output-lines input-lines
+							      license-lines)))
+		      'license-error
+		      :text "Failde to write to file."))))
+
+(defun one-element-p (list)
+  "Returns whether the list contains exactly one element."
+  (if (and list (not (cdr list)))
+      t
+      nil))
 
 (defun main (argv)
   (multiple-value-bind (remaining-args
@@ -62,8 +145,8 @@ directory then it recursively finds files in it."
 	       (license-error (err)
 		 (format *error-output* "Failed to license ~a~%~a~%"
 			 arg
-			 (license-error-text err))))
-	     (license-arg arg opts)))
+			 (license-error-text err))))))
 	  (t (format *error-output*
-		     "Failed to parse options ~{~a~}~%"
+		     "Failed to parse option~p ~{\"~a\"~}~%"
+		     (one-element-p unknown-opts)
 		     unknown-opts)))))

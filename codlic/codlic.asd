@@ -7,6 +7,7 @@
   :depends-on (#:getopt #:cl-ppcre)
   :serial t
   :components ((:file "package")
+	       (:file "parameters")
 	       (:file "conditions")
 	       (:file "files")
 	       (:file "filetypes")

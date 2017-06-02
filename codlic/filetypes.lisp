@@ -6,6 +6,7 @@
   (let ((filetypes-table (make-hash-table :test #'equalp)))
     (setf (gethash "c" filetypes-table) ".*\\.c")
     (setf (gethash "cpp" filetypes-table) ".*\\.cpp|.*\\.cc")
+    (setf (gethash "lisp" filetypes-table) ".*\\.lisp")
     filetypes-table))
 
 (defparameter *filetypes-table* (make-filetypes-table)
