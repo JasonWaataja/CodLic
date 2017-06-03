@@ -23,3 +23,11 @@ with error-type and args. For example (fail-if-nil (t) 'my-error :text
 	 (return `(let ((,values '()))
 			  ,@new-forms
 			  (values-list (nreverse ,values)))))))
+
+(defun license-error (&optional text)
+  (error 'license-error :text text))
+
+(defun license-error-if-nil (expr &optional text)
+  (fail-if-nil (expr)
+	       'license-error
+	       :text text))

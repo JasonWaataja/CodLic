@@ -13,7 +13,8 @@
     ("opening-comment-string" :required nil)
     ("closing-comment-string" :required nil)
     ("continuation-comment-string" :required nil)
-    ("non-blank-first-line" :none "non-blank-first-line")))
+    ("non-blank-first-line" :none nil)
+    ("skip-file-on-error" :none nil)))
 
 (defmacro acase ((cons-name alist &key else-form test) &rest test-forms)
   "Switch statement for alists. For each test form, of the form (test-form
@@ -44,7 +45,9 @@
 
 (defun get-license (options)
   "Gets the correct license file for the given command line options"
-  (acase (name-cons options :test #'equal)
+  (acase (name-cons options
+		    :test #'equal
+		    :else-form (license-error "No license, use --license-name or --license-file."))
     ("license-name" (gethash (cdr name-cons) *license-table*))
     ("license-file" (cdr name-cons))))
 
@@ -62,14 +65,15 @@
 			       :test #'equal))
 	(continuation-string (assoc "continuation-comment-string" options
 				    :test #'equal)))
-    (when (and opening-string closing-string continuation-string)
-      (make-composite-comment-type (cdr opening-string)
-				   (cdr closing-string)
-				   (cdr continuation-string)
-				   :blank-first-line
-				   (not (assoc "non-blank-first-line"
-					       options
-					       :test #'equal))))))
+    (if (and opening-string closing-string continuation-string)
+	(make-composite-comment-type (cdr opening-string)
+				     (cdr closing-string)
+				     (cdr continuation-string)
+				     :blank-first-line
+				     (not (assoc "non-blank-first-line"
+						 options
+						 :test #'equal)))
+	(license-error "When using custom comment strings, --opening-comment-string, --closing-comment-string, and --continuation-comment-string are required."))))
 
 (defun get-comment-type (file options)
   "Gets the correct comment type based on the current argumet and previously
@@ -143,16 +147,15 @@ input-lines and license-lines are arrays and the return value is an array."
   "Licenses an argument based on the given options."
   (let ((license-file (get-license options))
 	(file-list (get-file-list arg options)))
-    (fail-if-nil (license-file file-list)
-		 'license-error
-		 :text "Could not load license or file list for argument.")
+    (license-error-if-nil license-file "Couldn't deduce license file to use.")
+    (license-error-if-nil file-list "Couldn't find any files to license.")
     (loop with license-lines = (read-file-lines license-file)
        initially
-	 (fail-if-nil (license-lines)
-		      'license-error
-		      :text "Failed to read license file.")
+	 (license-error-if-nil license-lines
+			       "Failed to read license file.")
        for file in file-list
-       do (add-license-lines file license-lines options))))
+       do (restart-case (add-license-lines file license-lines options)
+	    (skip-file () nil)))))
 
 (defun one-element-p (list)
   "Returns whether the list contains exactly one element."
@@ -160,19 +163,39 @@ input-lines and license-lines are arrays and the return value is an array."
       t
       nil))
 
+(defun skip-file (err)
+  (declare (ignore err))
+  (let ((restart (find-restart 'skip-file)))
+    (when restart (invoke-restart restart))))
+
 (defun main (argv)
   (multiple-value-bind (remaining-args
 			opts
 			unknown-opts)
       (getopt:getopt argv *cmd-options*)
-    (cond ((null unknown-opts)
-	   (dolist (arg remaining-args)
-	     (handler-case (license-arg arg opts)
-	       (license-error (err)
-		 (format *error-output* "Failed to license ~a~%~a~%"
-			 arg
-			 (license-error-text err))))))
-	  (t (format *error-output*
-		     "Failed to parse option~p ~{\"~a\"~}~%"
-		     (one-element-p unknown-opts)
-		     unknown-opts)))))
+    (cond (unknown-opts (format *error-output*
+				"Failed to parse option~p ~{\"~a\"~^, ~}~%"
+				(length unknown-opts)
+				unknown-opts)
+			nil)
+	  ((null remaining-args)
+	   (format *error-output* "No files to license, exiting.~%")
+	   nil)
+	  (t (loop for arg in remaining-args do
+	       (handler-case
+		   (handler-bind ((license-error
+				   #'(lambda (err)
+				       (declare (ignore err))
+				       (let ((restart (find-restart 'skip-file)))
+					 (when (and restart (assoc "skip-file-on-error"
+								   opts
+								   :test #'equal))
+					   (invoke-restart restart))))))
+		     (license-arg arg opts))
+		 (license-error (err) (format *error-output*
+					      "Failure while processing argument \"~a\"~%~
+~a~%Aborting.~%"
+					      arg
+					      (license-error-text err))
+				(return nil)))
+		  finally (return t))))))
