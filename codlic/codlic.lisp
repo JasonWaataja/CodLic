@@ -141,32 +141,59 @@ input-lines and license-lines are arrays and the return value is an array."
 				       license-lines
 				       comment-type)))
 		   'license-error
-		   :text "Failed to write to file"))))
+		   :text "Failed to write to file."))))
 
 (defun license-arg (arg options)
   "Licenses an argument based on the given options."
   (let ((license-file (get-license options))
 	(file-list (get-file-list arg options)))
     (license-error-if-nil license-file "Couldn't deduce license file to use.")
-    (license-error-if-nil file-list "Couldn't find any files to license.")
+    (license-error-if-nil file-list (format nil
+					    "Couldn't find any files to license for arg \"~a\""
+					    arg))
     (loop with license-lines = (read-file-lines license-file)
        initially
 	 (license-error-if-nil license-lines
-			       "Failed to read license file.")
+			       (format nil "Failed to read license file \"~a\""
+				       license-file))
        for file in file-list
-       do (restart-case (add-license-lines file license-lines options)
-	    (skip-file () nil)))))
-
-(defun one-element-p (list)
-  "Returns whether the list contains exactly one element."
-  (if (and list (not (cdr list)))
-      t
-      nil))
+       do (handler-case (add-license-lines file license-lines options)
+	    (license-error (err)
+	      (restart-case (file-license-error file
+						(license-error-text err))
+		(skip-file () nil)))))))
 
 (defun skip-file (err)
   (declare (ignore err))
   (let ((restart (find-restart 'skip-file)))
     (when restart (invoke-restart restart))))
+
+(defun make-file-license-error-handler (opts)
+  (lambda (err)
+    (let ((restart (find-restart 'skip-file)))
+      (when (and restart (assoc "skip-file-on-error"
+				opts
+				:test #'equal))
+	(format *error-output*
+		"Warning, failed to license file \"~a\": ~a~%"
+		(file-license-error-file err)
+		(license-error-text err))))))
+
+(defun process-args (remaining-args opts)
+  "Call after reading the options. For each argument in remaining-args, attempt
+to license the file or files that it points to. The list, options, is the alist
+of arguments and their values."
+  (loop for arg in remaining-args do
+       (handler-case
+	   (handler-bind ((file-license-error (make-file-license-error-handler opts)))
+	     (license-arg arg opts))
+	 (license-error (err) (format *error-output*
+				      "Failure while processing argument \"~a\"~%~
+~a~%Aborting.~%"
+				      arg
+				      (license-error-text err))
+			(return nil)))
+     finally (return t)))
 
 (defun main (argv)
   (multiple-value-bind (remaining-args
@@ -181,21 +208,4 @@ input-lines and license-lines are arrays and the return value is an array."
 	  ((null remaining-args)
 	   (format *error-output* "No files to license, exiting.~%")
 	   nil)
-	  (t (loop for arg in remaining-args do
-	       (handler-case
-		   (handler-bind ((license-error
-				   #'(lambda (err)
-				       (declare (ignore err))
-				       (let ((restart (find-restart 'skip-file)))
-					 (when (and restart (assoc "skip-file-on-error"
-								   opts
-								   :test #'equal))
-					   (invoke-restart restart))))))
-		     (license-arg arg opts))
-		 (license-error (err) (format *error-output*
-					      "Failure while processing argument \"~a\"~%~
-~a~%Aborting.~%"
-					      arg
-					      (license-error-text err))
-				(return nil)))
-		  finally (return t))))))
+	  (t (process-args remaining-args opts)))))

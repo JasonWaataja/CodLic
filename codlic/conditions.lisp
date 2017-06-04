@@ -3,7 +3,10 @@
 (in-package #:codlic)
 
 (define-condition license-error (error)
-  ((text :initarg :text :reader license-error-text)))
+  ((text :initarg :text :accessor license-error-text)))
+
+(define-condition file-license-error (license-error)
+  ((file :initarg :file :accessor file-license-error-file)))
 
 (defmacro fail-if-nil ((&rest forms) error-type &rest args)
   "Checks each form in order. If any is nil, then throw an error constructed
@@ -31,3 +34,8 @@ with error-type and args. For example (fail-if-nil (t) 'my-error :text
   (fail-if-nil (expr)
 	       'license-error
 	       :text text))
+
+(defun file-license-error (file text)
+  (error 'file-license-error
+	 :file file
+	 :text text))
