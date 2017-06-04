@@ -6,8 +6,10 @@ EXEC=codlic
 IMAGE=${EXEC}.image
 EVAL_FORM = (defparameter *install-prefix* "${INSTALL_PREFIX}") \
 			(load "setup.lisp")
+CURRENT_DIR = $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 
 install_image:
+	ln -sf ${CURRENT_DIR} quicklisp/local-projects/codlic
 	mkdir -p ${INSTALL_IMAGE}
 	${CL_LAUNCH} -e '${EVAL_FORM}' -d "${INSTALL_IMAGE}/${IMAGE}"
 
