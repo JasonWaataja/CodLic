@@ -5,7 +5,7 @@
 (defun find-license-path (license-file)
   "Uses *install-prefix* to find the full path to the license file with the
 given filename. For example, gplv3 would expand to *install-prefix/share/gplv3."
-  (merge-pathnames (make-pathname :directory '(:relative "share")
+  (merge-pathnames (make-pathname :directory '(:relative "share" "codlic" "licenses")
 				  :name license-file)
 		   (uiop:ensure-directory-pathname *install-prefix*)))
 
