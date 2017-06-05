@@ -1,4 +1,3 @@
 (load "quicklisp/setup.lisp")
-(ql:quickload "getopt")
-(ql:quickload "cl-ppcre")
+(push (uiop:getcwd) asdf:*central-registry*)
 (ql:quickload "codlic")
