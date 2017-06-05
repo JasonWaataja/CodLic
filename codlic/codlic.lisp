@@ -86,14 +86,14 @@ passed arguments. This can change based on the arg if auto-detection is used."
     ("single-comment-string" (make-single-comment-type (cdr comment-cons)))))
 
 (defun walk-directory (dirpath func)
-  (let ((wildpath (make-pathname :defaults (uiop:ensure-directory-pathname
-					    dirpath)
-				 :name :wild
-				 :type :wild)))
-    (loop for entry in (uiop:directory* wildpath)
-       do (funcall func entry)
-       when (uiop:directory-exists-p entry)
-       do (walk-directory entry func))))
+  "My own walking func, since I don't want to learn the uiop one. This one
+purposefully doesn't follow symlinks because I don't want licensing to happen
+recursively. That's why it doesn't just use the directory* function."
+  (loop for file in (uiop:directory-files dirpath)
+     do (funcall func file))
+  (loop for dir in (uiop:subdirectories dirpath) do
+       (funcall func dir)
+       (walk-directory dir func)))
 
 (defun should-license-p (file options)
   ;; If none of these options are present, license by default.
