@@ -16,6 +16,9 @@
     ("non-blank-first-line" :none nil)
     ("skip-file-on-error" :none nil)))
 
+(defun assoc-equal (item alist)
+  (assoc item alist :test #'equal))
+
 (defmacro acase ((cons-name alist &key else-form test) &rest test-forms)
   "Switch statement for alists. For each test form, of the form (test-form
   result-forms*), searches alist for test-form. In each case, if it is found,
@@ -179,11 +182,64 @@ input-lines and license-lines are arrays and the return value is an array."
 		(file-license-error-file err)
 		(license-error-text err))))))
 
+(defmacro exactly-one ((one-form &optional none-form more-form) &rest vals)
+  "Returns one-form if exactly one of vals is true, none-form if none are true,
+and more-form if more than one are true."
+  (let ((value (gensym))
+	(true-count (gensym)))
+    `(loop for ,value in (list ,@vals)
+	count ,value into ,true-count
+	if (> ,true-count 1) return ,more-form
+	finally (return (if (= ,true-count 1)
+			    ,one-form
+			    ,none-form)))))
+
+(defun check-has-license (opts)
+  (when (and (assoc-equal "license-name" opts)
+	     (assoc-equal "license-file" opts))
+    (license-error "Cannot use both --license-name and --license-file"))
+  (when (and (not (assoc-equal "license-name" opts))
+	     (not (assoc-equal "license-file" opts)))
+    (acons "license-name" "mit" opts)
+    (format t "No license, using --license-name mit~%")))
+
+(defun check-has-filetype (opts)
+  (when (and (assoc-equal "filetype-language" opts)
+	     (assoc-equal "filetype-regex" opts))
+    (license-error "Cannot use both --filetype-language and --filetype-regex"))
+  (when (and (not (assoc-equal "filetype-language" opts))
+	     (not (assoc-equal "filetype-regex" opts)))
+    (format t "No filetype, attempting to license every file.~%")))
+
+(defun check-has-comment-type (opts)
+  (exactly-one (nil
+		(progn (acons "auto-detect-comment-type" "auto-detect-comment-type" opts)
+		       (format t "No comment type, using --auto-detect-comment-type"))
+		(license-error "Must use no more than one of --single-comment-string, composite comment options, or --auto-detect-comment-type"))
+	       (assoc-equal "single-comment-string" opts)
+	       (or (assoc-equal "opening-comment-string" opts)
+		   (assoc-equal "closing-comment-string" opts)
+		   (assoc-equal "continuation-comment-string" opts))
+	       (assoc-equal "auto-detect-comment-type" opts)))
+
+(defun verify-options (opts)
+  "Makes sure the options are consistent."
+  (check-has-license opts)
+  (check-has-filetype opts)
+  (check-has-comment-type opts))
+
 (defun process-args (remaining-args opts)
   "Call after reading the options. For each argument in remaining-args, attempt
 to license the file or files that it points to. The list, options, is the alist
 of arguments and their values."
-  (loop for arg in remaining-args do
+  (loop
+     initially
+       (handler-case (verify-options opts)
+	 (license-error (err)
+	   (format *error-output* "Invalid arguments.~%~a~%"
+		   (license-error-text err))
+	   (return nil)))
+     for arg in remaining-args do
        (handler-case
 	   (handler-bind ((file-license-error (make-file-license-error-handler opts)))
 	     (license-arg arg opts))
