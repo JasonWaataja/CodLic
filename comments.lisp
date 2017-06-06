@@ -13,7 +13,8 @@
        for line across input-lines
        do (vector-push-extend (concatenate 'string
 					   comment-string
-					   (if insert-space
+					   (if (and insert-space
+						    (not (zerop (length line))))
 					       " "
 					       "")
 					   line)
@@ -45,7 +46,8 @@
 					  (if (and on-first-line (not blank-first-line))
 					      opening-string
 					      continuation-string)
-					  (if insert-space
+					  (if (and insert-space
+						   (not (zerop (length line))))
 					      " "
 					      "")
 					  line)
