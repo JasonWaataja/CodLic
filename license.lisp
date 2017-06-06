@@ -18,7 +18,6 @@ given filename. For example, gplv3 would expand to *install-prefix/share/gplv3."
 	     (setf (gethash name license-table)
 		   (find-license-path license-file-name))))
       (add-default "gplv3")
-      (add-default "gplv2")
       (add-with-name "gpl" "gplv3")
       (add-default "mit"))
     license-table))
