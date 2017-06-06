@@ -43,7 +43,7 @@ To specify what files to license, you can pass no options to attempt to license
 every file in a directory and will probably return an error when it cannot find
 the comment type for a file. One of the easiest options to use is
 `--auto-detect-comment-type` which does a lookup on some preset filetypes. You
-can specify individual comment languages with the `--comment-language` to
+can specify individual comment languages with the `--comment-language` option to
 specify one of the presets, such as `c` or `lisp`.  You can also use custom
 comment types, such as python style with `--single-comment-string '#'` or C with
 `--opening-comment-string "/*"`, `--closing-comment-string " */"`, and

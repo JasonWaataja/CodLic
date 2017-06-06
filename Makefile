@@ -18,6 +18,7 @@ install: install_image
 		-E main -o ${INSTALL_BIN}/${EXEC}
 	install -Dm755 licenses/gplv3 ${INSTALL_PREFIX}/share/codlic/licenses/gplv3
 	install -Dm755 licenses/mit ${INSTALL_PREFIX}/share/codlic/licenses/mit
+	install -Dm644 man/codlic.1 ${INSTALL_PREFIX}/share/man/man1
 
 # Requires the qlot program. Updates the libraries stored in the quicklisp
 # directory.
