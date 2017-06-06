@@ -1,0 +1,5 @@
+name: cl-ppcre
+version: ql-2017-05-16
+distinfo-subscription-url: qlot://localhost/cl-ppcre.txt
+release-index-url: qlot://localhost/cl-ppcre/ql-2017-05-16/releases.txt
+system-index-url: qlot://localhost/cl-ppcre/ql-2017-05-16/systems.txt

@@ -1,0 +1,2 @@
+# project url size file-md5 content-sha1 prefix [system-file1..system-fileN]
+getopt http://beta.quicklisp.org/archive/getopt/2015-09-23/getopt-20150923-git.tgz 5108 adc97a0ae99d65edff231b35862d67dd 001d521ec954ddd8222f708316c04c6e522e2b16 getopt-20150923-git getopt.asd
