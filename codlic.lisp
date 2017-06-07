@@ -14,7 +14,8 @@
     ("closing-comment-string" :required nil)
     ("continuation-comment-string" :required nil)
     ("non-blank-first-line" :none nil)
-    ("skip-file-on-error" :none nil)))
+    ("skip-file-on-error" :none nil)
+    ("skip-shebang" :none nil)))
 
 (defun assoc-equal (item alist)
   (assoc item alist :test #'equal))
@@ -119,10 +120,32 @@ directory then it recursively finds files in it."
 	(nreverse file-list))
       (list arg)))
 
-(defun create-output-lines (input-lines license-lines comment-type)
+(defun has-prefix (string prefix)
+  "Returns if string begins with prefix."
+  (let ((str-length (length string))
+	(prefix-length (length prefix)))
+    (if (< str-length prefix-length)
+	nil
+	(string= string prefix :end1 prefix-length :end2 prefix-length))))
+
+(defun has-shebang (first-line)
+  "Returns whether or not the line begins with \"#!\""
+  (has-prefix first-line "#!"))
+
+(defun create-output-lines (input-lines license-lines comment-type opts)
   "Returns the array of lines to write to the file starting with the given
 license lines, then a blank line, and finally the set of input lines. Both
 input-lines and license-lines are arrays and the return value is an array."
+  (when (and (assoc-equal "skip-shebang" opts)
+	     (plusp (length input-lines))
+	     (has-shebang (aref input-lines 0)))
+    (let ((first-line (aref input-lines 0))
+	  (rest-lines (subseq input-lines 1)))
+      (concatenate 'vector
+		   first-line
+		   (funcall comment-type license-lines)
+		   (list "")
+		   rest-lines)))
   (concatenate 'vector
 	       (funcall comment-type license-lines)
 	       (list "")
@@ -142,7 +165,8 @@ input-lines and license-lines are arrays and the return value is an array."
 				      (create-output-lines
 				       input-lines
 				       license-lines
-				       comment-type)))
+				       comment-type
+				       options)))
 		   'license-error
 		   :text "Failed to write to file."))))
 
