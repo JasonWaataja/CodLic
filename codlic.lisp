@@ -173,6 +173,11 @@ input-lines and license-lines are arrays and the return value is an array."
 		   'license-error
 		   :text "Failed to write to file."))))
 
+(defun find-replace-in-lines (lines find replace)
+  "Loop through an array of strings, which is lines. For each line, replace all
+occurences of find with replace."
+  )
+
 (defun license-arg (arg options)
   "Licenses an argument based on the given options."
   (let ((license-file (get-license options))
