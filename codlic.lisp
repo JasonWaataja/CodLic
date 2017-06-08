@@ -136,136 +136,145 @@ directory then it recursively finds files in it."
   "Returns the array of lines to write to the file starting with the given
 license lines, then a blank line, and finally the set of input lines. Both
 input-lines and license-lines are arrays and the return value is an array."
-  (when (and (assoc-equal "skip-shebang" opts)
+  (if (and (assoc-equal "skip-shebang" opts)
 	     (plusp (length input-lines))
 	     (has-shebang (aref input-lines 0)))
-    (let ((first-line (aref input-lines 0))
-	  (rest-lines (subseq input-lines 1)))
+      (let ((first-line (aref input-lines 0))
+	    (rest-lines (subseq input-lines 1)))
+	(concatenate 'vector
+		     (list first-line)
+		     (list "")
+		     (funcall comment-type license-lines)
+		     (list "")
+		     rest-lines))
       (concatenate 'vector
-		   first-line
 		   (funcall comment-type license-lines)
 		   (list "")
-		   rest-lines)))
-  (concatenate 'vector
-	       (funcall comment-type license-lines)
-	       (list "")
-	       input-lines))
+		   input-lines)))
 
-(defun add-license-lines (file license-lines options)
-  (when (should-license-p file options)
-    (let ((comment-type
-	   (fail-if-nil ((get-comment-type file options))
-			'license-error
-			:text "Failed to get comment type for file."))
-	  (input-lines
-	   (fail-if-nil ((read-file-lines file))
-			'license-error
-			:text "Failed to read input file.")))
-      (fail-if-nil ((write-file-lines file
-				      (create-output-lines
-				       input-lines
-				       license-lines
-				       comment-type
-				       options)))
-		   'license-error
-		   :text "Failed to write to file."))))
+  (defun add-license-lines (file license-lines options)
+    (when (should-license-p file options)
+      (let ((comment-type
+	     (fail-if-nil ((get-comment-type file options))
+			  'license-error
+			  :text "Failed to get comment type for file."))
+	    (input-lines
+	     (fail-if-nil ((read-file-lines file))
+			  'license-error
+			  :text "Failed to read input file.")))
+	(fail-if-nil ((write-file-lines file
+					(create-output-lines
+					 input-lines
+					 license-lines
+					 comment-type
+					 options)))
+		     'license-error
+		     :text "Failed to write to file."))))
 
-(defun license-arg (arg options)
-  "Licenses an argument based on the given options."
-  (let ((license-file (get-license options))
-	(file-list (get-file-list arg options)))
-    (license-error-if-nil license-file "Couldn't deduce license file to use.")
-    (license-error-if-nil file-list (format nil
-					    "Couldn't find any files to license for arg \"~a\""
-					    arg))
-    (loop with license-lines = (read-file-lines license-file)
-       initially
-	 (license-error-if-nil license-lines
-			       (format nil "Failed to read license file \"~a\""
-				       license-file))
-       for file in file-list
-       do (handler-case (add-license-lines file license-lines options)
-	    (license-error (err)
-	      (restart-case (file-license-error file
-						(license-error-text err))
-		(skip-file () nil)))))))
+  (defun license-arg (arg options)
+    "Licenses an argument based on the given options."
+    (let ((license-file (get-license options))
+	  (file-list (get-file-list arg options)))
+      (license-error-if-nil license-file "Couldn't deduce license file to use.")
+      (license-error-if-nil file-list (format nil
+					      "Couldn't find any files to license for arg \"~a\""
+					      arg))
+      (loop with license-lines = (read-file-lines license-file)
+	 initially
+	   (license-error-if-nil license-lines
+				 (format nil "Failed to read license file \"~a\""
+					 license-file))
+	 for file in file-list
+	 do (handler-case (add-license-lines file license-lines options)
+	      (license-error (err)
+		(restart-case (file-license-error file
+						  (license-error-text err))
+		  (skip-file () nil)))))))
 
-(defun skip-file (err)
-  (declare (ignore err))
-  (let ((restart (find-restart 'skip-file)))
-    (when restart (invoke-restart restart))))
-
-(defun make-file-license-error-handler (opts)
-  (lambda (err)
+  (defun skip-file (err)
+    (declare (ignore err))
     (let ((restart (find-restart 'skip-file)))
-      (when (and restart (assoc "skip-file-on-error"
-				opts
-				:test #'equal))
-	(format *error-output*
-		"Warning, failed to license file \"~a\": ~a~%"
-		(file-license-error-file err)
-		(license-error-text err))))))
+      (when restart (invoke-restart restart))))
 
-(defmacro exactly-one ((one-form &optional none-form more-form) &rest vals)
-  "Returns one-form if exactly one of vals is true, none-form if none are true,
+  (defun make-file-license-error-handler (opts)
+    (lambda (err)
+      (let ((restart (find-restart 'skip-file)))
+	(when (and restart (assoc "skip-file-on-error"
+				  opts
+				  :test #'equal))
+	  (format *error-output*
+		  "Warning, failed to license file \"~a\": ~a~%"
+		  (file-license-error-file err)
+		  (license-error-text err))))))
+
+  (defmacro exactly-one ((one-form &optional none-form more-form) &rest vals)
+    "Returns one-form if exactly one of vals is true, none-form if none are true,
 and more-form if more than one are true."
-  (let ((value (gensym))
-	(true-count (gensym)))
-    `(loop for ,value in (list ,@vals)
-	count ,value into ,true-count
-	if (> ,true-count 1) return ,more-form
-	finally (return (if (= ,true-count 1)
-			    ,one-form
-			    ,none-form)))))
+    (let ((value (gensym))
+	  (true-count (gensym)))
+      `(loop for ,value in (list ,@vals)
+	  count ,value into ,true-count
+	  if (> ,true-count 1) return ,more-form
+	  finally (return (if (= ,true-count 1)
+			      ,one-form
+			      ,none-form)))))
 
-(defun check-has-license (opts)
-  (when (and (assoc-equal "license-name" opts)
-	     (assoc-equal "license-file" opts))
-    (license-error "Cannot use both --license-name and --license-file"))
-  (when (and (not (assoc-equal "license-name" opts))
-	     (not (assoc-equal "license-file" opts)))
-    (acons "license-name" "mit" opts)
-    (format t "No license, using --license-name mit~%")))
+  (defun check-has-license (opts)
+    "Returns new version of opts, is destructive."
+    (when (and (assoc-equal "license-name" opts)
+	       (assoc-equal "license-file" opts))
+      (license-error "Cannot use both --license-name and --license-file"))
+    (when (and (not (assoc-equal "license-name" opts))
+	       (not (assoc-equal "license-file" opts)))
+      (setf opts (acons "license-name" "mit" opts))
+      (format t "No license, using --license-name mit~%"))
+    opts)
 
-(defun check-has-filetype (opts)
-  (when (and (assoc-equal "filetype-language" opts)
-	     (assoc-equal "filetype-regex" opts))
-    (license-error "Cannot use both --filetype-language and --filetype-regex"))
-  (when (and (not (assoc-equal "filetype-language" opts))
-	     (not (assoc-equal "filetype-regex" opts)))
-    (format t "No filetype, attempting to license every file.~%")))
+  (defun check-has-filetype (opts)
+    "Returns new version of opts, is destructive."
+    (when (and (assoc-equal "filetype-language" opts)
+	       (assoc-equal "filetype-regex" opts))
+      (license-error "Cannot use both --filetype-language and --filetype-regex"))
+    (when (and (not (assoc-equal "filetype-language" opts))
+	       (not (assoc-equal "filetype-regex" opts)))
+      (format t "No filetype, attempting to license every file.~%"))
+    opts)
 
-(defun check-has-comment-type (opts)
-  (exactly-one (nil
-		(progn (acons "auto-detect-comment-type" "auto-detect-comment-type" opts)
-		       (format t "No comment type, using --auto-detect-comment-type"))
-		(license-error "Must use no more than one of --single-comment-string, composite comment options, or --auto-detect-comment-type"))
-	       (assoc-equal "single-comment-string" opts)
-	       (or (assoc-equal "opening-comment-string" opts)
-		   (assoc-equal "closing-comment-string" opts)
-		   (assoc-equal "continuation-comment-string" opts))
-	       (assoc-equal "auto-detect-comment-type" opts)))
+  (defun check-has-comment-type (opts)
+    "Returns new value of opts, is destructive."
+    (exactly-one (nil
+		  (progn (setf opts
+			       (acons "auto-detect-comment-type" nil opts))
+			 (format t "No comment type, using --auto-detect-comment-type~%"))
+		  (license-error "Must use no more than one of --single-comment-string, composite comment options, or --auto-detect-comment-type"))
+		 (assoc-equal "single-comment-string" opts)
+		 (or (assoc-equal "opening-comment-string" opts)
+		     (assoc-equal "closing-comment-string" opts)
+		     (assoc-equal "continuation-comment-string" opts))
+		 (assoc-equal "auto-detect-comment-type" opts))
+    opts)
 
-(defun verify-options (opts)
-  "Makes sure the options are consistent."
-  (check-has-license opts)
-  (check-has-filetype opts)
-  (check-has-comment-type opts))
+  (defun verify-options (opts)
+    "Makes sure the options are consistent. Returns correct options if possible"
+    (setf opts (check-has-license opts))
+    (setf opts (check-has-filetype opts))
+    (setf opts (check-has-comment-type opts))
+    opts)
 
-(defun process-args (remaining-args opts)
-  "Call after reading the options. For each argument in remaining-args, attempt
+  (defun process-args (remaining-args opts)
+    "Call after reading the options. For each argument in remaining-args, attempt
 to license the file or files that it points to. The list, options, is the alist
 of arguments and their values."
-  (loop
-     initially
-       (handler-case (verify-options opts)
-	 (license-error (err)
-	   (format *error-output* "Invalid arguments.~%~a~%"
-		   (license-error-text err))
-	   (return nil)))
-     for arg in remaining-args do
-       (handler-case
-	   (handler-bind ((file-license-error (make-file-license-error-handler opts)))
+    (loop
+       initially
+	 (handler-case (setf opts (verify-options opts))
+	   (license-error (err)
+	     (format *error-output* "Invalid arguments.~%~a~%"
+		     (license-error-text err))
+	     (return nil)))
+       for arg in remaining-args do
+	 (handler-case
+	     (handler-bind ((file-license-error (make-file-license-error-handler opts)))
 	     (license-arg arg opts))
 	 (license-error (err) (format *error-output*
 				      "Failure while processing argument \"~a\"~%~
