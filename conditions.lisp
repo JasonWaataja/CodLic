@@ -13,29 +13,29 @@
 with error-type and args. For example (fail-if-nil (t) 'my-error :text
 \"my-text\"). Returns the values of the forms if no condition is signalled."
   (let ((values (gensym))
-	(current-value (gensym)))
+        (current-value (gensym)))
     (loop for form in forms
        with new-forms = '()
        do (push `(let ((,current-value ,form))
-		   (if ,current-value
-		       (push ,current-value ,values)
-		       (error ,error-type ,@args)))
-		new-forms)
+                   (if ,current-value
+                       (push ,current-value ,values)
+                       (error ,error-type ,@args)))
+                new-forms)
        finally
-	 (setf new-forms (nreverse new-forms))
-	 (return `(let ((,values '()))
-			  ,@new-forms
-			  (values-list (nreverse ,values)))))))
+         (setf new-forms (nreverse new-forms))
+         (return `(let ((,values '()))
+                          ,@new-forms
+                          (values-list (nreverse ,values)))))))
 
 (defun license-error (&optional text)
   (error 'license-error :text text))
 
 (defun license-error-if-nil (expr &optional text)
   (fail-if-nil (expr)
-	       'license-error
-	       :text text))
+               'license-error
+               :text text))
 
 (defun file-license-error (file text)
   (error 'file-license-error
-	 :file file
-	 :text text))
+         :file file
+         :text text))

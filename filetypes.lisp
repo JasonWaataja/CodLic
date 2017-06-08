@@ -25,15 +25,15 @@
   (multiple-value-bind (begin end)
       (cl-ppcre:scan regex target-string)
     (cond ((not begin) nil)
-	  ((or (not (eql begin 0))
-	       (not (eql end (length target-string))))
-	   nil)
-	  (t t))))
+          ((or (not (eql begin 0))
+               (not (eql end (length target-string))))
+           nil)
+          (t t))))
 
 (defun file-matches-language-p (pathspec filetype)
   "Checks if the file at pathspec matches the language specified by filetype."
   (let ((regex (get-filetype-regex filetype)))
     (if regex
-	;; Ensure it's not a pathname object.
-	(regex-matches-p regex (namestring pathspec))
-	nil)))
+        ;; Ensure it's not a pathname object.
+        (regex-matches-p regex (namestring pathspec))
+        nil)))

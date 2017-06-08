@@ -7,14 +7,14 @@
 on failure."
   (with-open-file (reader pathspec :if-does-not-exist nil)
     (if reader
-	(loop with lines = (make-array 0
-				       :adjustable t
-				       :fill-pointer 0
-				       :element-type 'string)
-	   for line = (read-line reader nil)
-	   while line
-	   do (vector-push-extend line lines)
-	   finally (return lines)))))
+        (loop with lines = (make-array 0
+                                       :adjustable t
+                                       :fill-pointer 0
+                                       :element-type 'string)
+           for line = (read-line reader nil)
+           while line
+           do (vector-push-extend line lines)
+           finally (return lines)))))
 
 (defun write-file-lines (pathspec lines-array)
   "Writes each line in the array of lines to the file at pathspec. Overwrites
