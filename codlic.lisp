@@ -54,8 +54,8 @@
   (acase (name-cons options
 		    :test #'equal
 		    :else-form (license-error "No license, use --license-name or --license-file."))
-	 ("license-name" (gethash (cdr name-cons) *license-table*))
-	 ("license-file" (cdr name-cons))))
+    ("license-name" (gethash (cdr name-cons) *license-table*))
+    ("license-file" (cdr name-cons))))
 
 (defun comment-type-for-file (path)
   (loop for language being the hash-keys in *comment-types-table*
@@ -87,9 +87,9 @@ passed arguments. This can change based on the arg if auto-detection is used."
   (acase (comment-cons options
 		       :else-form (get-composite-comment-type options)
 		       :test #'equal)
-	 ("comment-language" (gethash (cdr comment-cons) *comment-types-table*))
-	 ("auto-detect-comment-type" (comment-type-for-file file))
-	 ("single-comment-string" (make-single-comment-type (cdr comment-cons)))))
+    ("comment-language" (gethash (cdr comment-cons) *comment-types-table*))
+    ("auto-detect-comment-type" (comment-type-for-file file))
+    ("single-comment-string" (make-single-comment-type (cdr comment-cons)))))
 
 (defun walk-directory (dirpath func)
   "My own walking func, since I don't want to learn the uiop one. This one
@@ -104,10 +104,10 @@ recursively. That's why it doesn't just use the directory* function."
 (defun should-license-p (file options)
   ;; If none of these options are present, license by default.
   (acase (license-cons options :else-form t :test #'equal)
-	 ("filetype-language" (file-matches-language-p file
-						       (cdr license-cons)))
-	 ("filetype-regex" (regex-matches-p (cdr license-cons)
-					    file))))
+    ("filetype-language" (file-matches-language-p file
+						  (cdr license-cons)))
+    ("filetype-regex" (regex-matches-p (cdr license-cons)
+				       file))))
 
 (defun get-file-list (arg options)
   "Gets the list of files to operate on for the given argument and options. If
@@ -291,7 +291,7 @@ of arguments and their values."
      initially
        (when (assoc-equal "print-license" opts)
 	 (return (print-license opts)))
-       (handler-case (setf opts verify-options opts))
+       (handler-case (setf opts (verify-options opts))
 	 (license-error (err)
 	   (format *error-output* "Invalid arguments.~%~a~%"
 		   (license-error-text err))
