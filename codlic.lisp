@@ -15,7 +15,9 @@
     ("continuation-comment-string" :required nil)
     ("non-blank-first-line" :none nil)
     ("skip-file-on-error" :none nil)
-    ("skip-shebang" :none nil)))
+    ("skip-shebang" :none nil)
+    ("print-license" :none nil)
+    ("license-replace" :required nil)))
 
 (defun assoc-equal (item alist)
   (assoc item alist :test #'equal))
@@ -261,17 +263,42 @@ and more-form if more than one are true."
   (setf opts (check-has-comment-type opts))
   opts)
 
+(defun print-license-file (license-file)
+  "Returns t on success, nil on failure."
+  (let ((license-lines (read-file-lines license-file)))
+    (if license-lines
+	(loop for line across license-lines
+	   do (format t "~a~%" line)
+	   finally (return t))
+	nil)))
+
+(defun print-license (opts)
+  "Returns t on success, nil on failure."
+  (let ((license (handler-case (get-license opts)
+		   (license-error (err)
+		     (format *error-output* "Cannot print license:~%~a~%"
+			     (license-error-text err))
+		     nil))))
+    (if license
+	(print-license-file license)
+	nil)))
+
 (defun process-args (remaining-args opts)
   "Call after reading the options. For each argument in remaining-args, attempt
 to license the file or files that it points to. The list, options, is the alist
 of arguments and their values."
   (loop
      initially
-       (handler-case (setf opts (verify-options opts))
+       (when (assoc-equal "print-license" opts)
+	 (return (print-license opts)))
+       (handler-case (setf opts verify-options opts))
 	 (license-error (err)
 	   (format *error-output* "Invalid arguments.~%~a~%"
 		   (license-error-text err))
 	   (return nil)))
+       (when (null remaining-args)
+	 (format *error-output* "No files to license, exiting.~%")
+	 (return nil))
      for arg in remaining-args do
        (handler-case
 	   (handler-bind ((file-license-error (make-file-license-error-handler opts)))
@@ -294,7 +321,4 @@ of arguments and their values."
 				(length unknown-opts)
 				unknown-opts)
 			nil)
-	  ((null remaining-args)
-	   (format *error-output* "No files to license, exiting.~%")
-	   nil)
 	  (t (process-args remaining-args opts)))))
