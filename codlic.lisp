@@ -156,6 +156,8 @@ INPUT-LINES and LICENSE-LINES are arrays and the return value is an array."
                    input-lines)))
 
 (defun add-license-lines (file license-lines options)
+  "Adds LICENSE-LINES to the lines in FILE and writes back to it based on
+OPTIONS. May signal a `license-error'."
   (when (should-license-p file options)
     (let ((comment-type
            (fail-if-nil ((get-comment-type file options))
@@ -174,10 +176,20 @@ INPUT-LINES and LICENSE-LINES are arrays and the return value is an array."
                    'license-error
                    :text "Failed to write to file."))))
 
-(defun find-replace-in-lines (lines find replace)
-  "Loop through an array of strings, which is LINES. For each line, replace all
-occurences of FIND with REPLACE."
-  )
+
+(defun replace-all (string part replacement &key (test #'char=))
+  "From the Common Lisp Cookbook, replaces instances of part with replacement."
+  (with-output-to-string (out)
+    (loop with part-length = (length part)
+       for old-pos = 0 then (+ pos part-length)
+       for pos = (search part string
+                         :start2 old-pos
+                         :test test)
+       do (write-string string out
+                        :start old-pos
+                        :end (or pos (length string)))
+       when pos do (write-string replacement out)
+       while pos)))
 
 (defun license-arg (arg options)
   "Licenses an argument based on the given options."
