@@ -222,7 +222,7 @@ return them. Also makes the necessary string replacements based on OPTS."
     (license-error-if-nil file-list (format nil
                                             "Couldn't find any files to license for arg \"~a\""
                                             arg))
-    (loop with license-lines = (read-file-lines license-file)
+    (loop with license-lines = (read-license-lines license-file options)
        initially
          (license-error-if-nil license-lines
                                (format nil "Failed to read license file \"~a\""
