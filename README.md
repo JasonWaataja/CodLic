@@ -60,8 +60,8 @@ See `man codlic` for information on every option.
 To license all C files in a directory with the MIT License, use
 
 ```bash
-codlic --license-name mit --filetype-language c --comment-language c my_dir \
-	--license-search "<copyright year>" --license-replace 2017
+codlic --license-name mit --filetype-language c --comment-language c \
+	--license-search "<copyright year>" --license-replace 2017 my_dir
 ```
 
 To license the C++ files in a directory with the gplv3
