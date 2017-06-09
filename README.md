@@ -7,9 +7,9 @@ write them all, then license them all at once. It is written in Common Lisp. I
 started a C++ version once but wanted to have fun.
 
 ## Installation
-codlic only runs on UNIX system and requires a Common Lisp implementation. The
-only one that I've ever tried is sbcl and don't expect it to work with anything
-else. It can be installed in most distros.
+codlic only runs on UNIX and Unix-like systems and building it requires a Common
+Lisp implementation. The only one that I've ever tried is sbcl and don't expect
+it to work with anything else. It can be installed in most distros.
 
 To install, simply run `make install` or `make install INSTALL_PREFIX=` with
 root privileges. Don't expect this makefile to behave like a normal one; it
