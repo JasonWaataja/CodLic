@@ -1,0 +1,93 @@
+.TH codlic 1 "06 June, 2017" "0.1.0" "codlic man page"
+.SH NAME
+codlic \- A program for adding license text to code
+.SH SYNOPSIS
+codlic [options] [files]
+.SH DESCRIPTION
+codlic is a program that is meant for quickly licensing code files. You can
+write them all, then license them all at once. It is written in Common Lisp. I
+started a C++ version once but wanted to have fun.
+
+Running codlic requires a license, a way to select files, and a way to select
+the comment type to use.
+
+You can specify the license with --license-file or --license-name. Using
+--license-name you can specify one of the included licenses such as gplv3 or
+mit. Note, these are templates and you need to fill in things like copyright
+holder, program name, and year yourself. This can be done with --license-search
+and --license-replace. The license defaults to MIT.
+
+To specify what files to license, you can pass no options to attempt to license
+every file in a directory but it will probably return an error when it cannot
+find the comment type for a file. One of the easiest options to use is
+--auto-detect-comment-type which does a lookup on some preset filetypes. You can
+specify individual comment languages with the --comment-language option to
+specify one of the presets, such as c or lisp.  You can also use custom comment
+types, such as python style with --single-comment-string '#' or C with
+--opening-comment-string "/*", --closing-comment-string " */", and
+--continuation-comment-string " *".  Notice the leading spaces in the closing
+and continuation comment strings, this is so the formatting lines up.
+
+To choose what files to license, simply pass files as arguments or directories
+with some selection options. One way to filter out files is to use the
+--filetype-language with a preset such as c or lisp. Another way is to use a
+regex. To license files that end in both .c and .cc, you can use
+--filetype-regex '.*\.c|.*\.cc' or '.*\.cc?.
+.SH OPTIONS
+.IP "--license-name"
+Use one of the built in licenses, options are gplv3 and mit. These require you
+to edit them for information such as copyright holder, though. This means you
+should copy these from the installation directory's data directory, editing
+them, and using --license-file. That, or use a recursive sed replacement
+command.
+.IP "--license-file"
+Use the given file as the header to add to code.
+.IP "--filetype-language"
+Only license files with the given language. Options include c and lisp.
+.IP "--filetype-regex"
+Only license files that match the given perl-compatible regular expression. For
+example, to license all C and C++ files, use ".*\.c|.*\.cc" or ".*\.cc?".
+.IP "--comment-language"
+License files with the comment type associated with the given language. Options
+include c and lisp.
+.IP "--auto-detect-comment-type"
+Instead of manually specifying how to license the file, attempt to detect the
+filetype and use the corresponding comment type accordingly. Currently, it
+includes c and lisp.
+.IP "--single-comment-string"
+The string to put at the beginning of each to comment it. This option can be
+used on its own to license files in the Python or Lisp style.
+.IP "--opening-comment-string"
+What to put at the start of the first line of a block comment for a license. Use
+with --closing-comment-string and --continuation-comment-string.
+.IP "--closing-comment-string"
+What to put at the start of the last line of a block comment for a license. Use
+with --opening-comment-string and --continuation-comment-string.
+.IP "--continuation-comment-string"
+What to put at the start of a line in the middle of a block comment for a
+license. Use with --opening-comment-string and --closing-comment-string.
+.IP "--non-blank-first-line"
+Don't put a blank line with opening-comment-string when using a block comment
+style. For example, don't start a file with a line that is just "/*" in C files.
+.IP "--skip-file-on-error"
+Don't end the licensing process when encountering an error licensing a specific
+file.
+.IP "--skip-shebang"
+If the line starts with a shebang, e.g. "#!/bin/bash", leave that as the first
+line, add a blank line, then the license.
+.IP "--print-license"
+Print the text of the license that would be used in a licensing. You can use
+this to find out what to find and replace in the license.
+.IP "--license-search"
+Search the license for a string. If --license-replace is given, then replace it
+with that string. Otherwise, deletes it in the license. This is for setting the
+copyright holder and year, etc.
+.IP "--license-replace"
+If --license-search is provided, then replace all instances of that string with
+this string in the license. This is for setting the copyright holder and year,
+etc.
+.SH BUGS
+There's a lot of features I know would make it work much better. I might add
+them some day.
+.SH AUTHOR
+Jason Waataja <jasonswaataja@gmail.com>
