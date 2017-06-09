@@ -14,14 +14,12 @@ the comment type to use.
 You can specify the license with --license-file or --license-name. Using
 --license-name you can specify one of the included licenses such as gplv3 or
 mit. Note, these are templates and you need to fill in things like copyright
-holder, program name, and year yourself. A feature to do this easily will
-probably included in the future. After running the program, you can probably run
-something like find . -exec sed -i 's/input string/replacement string/g' {} \;
-to replace these strings.
+holder, program name, and year yourself. This can be done with --license-search
+and --license-replace. The license defaults to MIT.
 
 To specify what files to license, you can pass no options to attempt to license
-every file in a directory and will probably return an error when it cannot find
-the comment type for a file. One of the easiest options to use is
+every file in a directory but it will probably return an error when it cannot
+find the comment type for a file. One of the easiest options to use is
 --auto-detect-comment-type which does a lookup on some preset filetypes. You can
 specify individual comment languages with the --comment-language option to
 specify one of the presets, such as c or lisp.  You can also use custom comment
@@ -74,6 +72,20 @@ style. For example, don't start a file with a line that is just "/*" in C files.
 .IP "--skip-file-on-error"
 Don't end the licensing process when encountering an error licensing a specific
 file.
+.IP "--skip-shebang"
+If the line starts with a shebang, e.g. "#!/bin/bash", leave that as the first
+line, add a blank line, then the license.
+.IP "--print-license"
+Print the text of the license that would be used in a licensing. You can use
+this to find out what to find and replace in the license.
+.IP "--license-search"
+Search the license for a string. If --license-replace is given, then replace it
+with that string. Otherwise, deletes it in the license. This is for setting the
+copyright holder and year, etc.
+.IP "--license-replace"
+If --license-search is provided, then replace all instances of that string with
+this string in the license. This is for setting the copyright holder and year,
+etc.
 .SH BUGS
 There's a lot of features I know would make it work much better. I might add
 them some day.

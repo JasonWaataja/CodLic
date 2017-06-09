@@ -34,10 +34,8 @@ the comment type to use.
 You can specify the license with `--license-file` or `--license-name`. Using
 `--license-name` you can specify one of the included licenses such as `gplv3` or
 `mit`. Note, these are templates and you need to fill in things like copyright
-holder, program name, and year yourself. A feature to do this easily will
-probably included in the future. After running the program, you can probably run
-something like `find . -exec sed -i 's/input string/replacement string/g' {} \;`
-to replace these strings.
+holder, program name, and year yourself. This can be done with --license-search
+and --license-replace. The license defaults to MIT.
 
 To specify what files to license, you can pass no options to attempt to license
 every file in a directory and will probably return an error when it cannot find
@@ -55,6 +53,8 @@ with some selection options. One way to filter out files is to use the
 `--filetype-language` with a preset such as c or lisp. Another way is to use a
 regex. To license files that end in both `.c` and `.cc`, you can use
 `--filetype-regex '.*\.c|.*\.cc'` or `'.*\.cc?`.
+
+See `man codlic` for information on every option.
 
 ## Examples
 To license all C files in a directory with the MIT License, use
