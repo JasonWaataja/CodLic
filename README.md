@@ -1,4 +1,4 @@
-# codLic
+# codlic
 A program for adding license text to code
 
 ## Synopsis
@@ -60,8 +60,8 @@ See `man codlic` for information on every option.
 To license all C files in a directory with the MIT License, use
 
 ```bash
-dfm --license-name mit --filetype-language c --comment-language c my_dir
-find my_dir -exec sed -i 's/<copyright year>/2017/g' {} \;
+codlic --license-name mit --filetype-language c --comment-language c my_dir \
+	--license-search "<copyright year>" --license-replace 2017
 ```
 
 To license the C++ files in a directory with the gplv3
@@ -69,5 +69,6 @@ To license the C++ files in a directory with the gplv3
 ```bash
 cp /usr/local/share/codlic/license/gplv3 .
 sed -i 's/Foobar/your-project/g' gplv3
-dfm --license-file ./gplv3 --filetype-regex '.*\.cc' --auto-detect-comment-type my_dir
+codlic --license-file ./gplv3 --filetype-regex '.*\.cc' \
+	--auto-detect-comment-type my_dir
 ```
