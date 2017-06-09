@@ -1,4 +1,5 @@
 ;;;; codlic.lisp
+;;;; Main file for codlic, inserts license texts at the beginning of files.
 
 (in-package #:codlic)
 
@@ -25,12 +26,12 @@
 (defmacro acase ((cons-name alist &key else-form test) &rest test-forms)
   "Switch statement for alists. For each test form, of the form (test-form
   result-forms*), searches alist for test-form. In each case, if it is found,
-  then result-forms for that case are evaluated and returned. If no case matches
-  then else-form is evaluated and returned."
-  ;; This is formed by going through the test-forms in reverse. Since a
+  then TEST-FORMS for that case are evaluated and returned. If no case matches
+  then ELSE-FORM is evaluated and returned."
+  ;; This is formed by going through the TEST-FORMS in reverse. Since a
   ;; consecutive cond won't work (assoc would have to be run twice), a series of
-  ;; consecutive let and if statements must be used, but since the last one must
-  ;; end in else-form it must be built in reverse.
+  ;; consecutive LET and IF statements must be used, but since the last one must
+  ;; end in ELSE-FORM it must be built in reverse.
   (setf test-forms (nreverse test-forms))
   (loop with final-form = '()
      initially
@@ -92,9 +93,9 @@ passed arguments. This can change based on the arg if auto-detection is used."
          ("single-comment-string" (make-single-comment-type (cdr comment-cons)))))
 
 (defun walk-directory (dirpath func)
-  "My own walking func, since I don't want to learn the uiop one. This one
+  "My own walking func, since I don't want to learn the UIOP one. This one
 purposefully doesn't follow symlinks because I don't want licensing to happen
-recursively. That's why it doesn't just use the directory* function."
+recursively. That's why it doesn't just use the DIRECTORY* function."
   (loop for file in (uiop:directory-files dirpath)
      do (funcall func file))
   (loop for dir in (uiop:subdirectories dirpath) do
@@ -102,7 +103,7 @@ recursively. That's why it doesn't just use the directory* function."
        (walk-directory dir func)))
 
 (defun should-license-p (file options)
-  ;; If none of these options are present, license by default.
+  ;; If none of these options are present, license anything by default.
   (acase (license-cons options :else-form t :test #'equal)
          ("filetype-language" (file-matches-language-p file
                                                        (cdr license-cons)))
@@ -123,7 +124,7 @@ directory then it recursively finds files in it."
       (list arg)))
 
 (defun has-prefix (string prefix)
-  "Returns if string begins with prefix."
+  "Returns if STRING begins with prefix."
   (let ((str-length (length string))
         (prefix-length (length prefix)))
     (if (< str-length prefix-length)
@@ -131,13 +132,13 @@ directory then it recursively finds files in it."
         (string= string prefix :end1 prefix-length :end2 prefix-length))))
 
 (defun has-shebang (first-line)
-  "Returns whether or not the line begins with \"#!\""
+  "Returns whether or not FIRST-LINE begins with \"#!\""
   (has-prefix first-line "#!"))
 
 (defun create-output-lines (input-lines license-lines comment-type opts)
   "Returns the array of lines to write to the file starting with the given
 license lines, then a blank line, and finally the set of input lines. Both
-input-lines and license-lines are arrays and the return value is an array."
+INPUT-LINES and LICENSE-LINES are arrays and the return value is an array."
   (if (and (assoc-equal "skip-shebang" opts)
            (plusp (length input-lines))
            (has-shebang (aref input-lines 0)))
@@ -174,8 +175,8 @@ input-lines and license-lines are arrays and the return value is an array."
                    :text "Failed to write to file."))))
 
 (defun find-replace-in-lines (lines find replace)
-  "Loop through an array of strings, which is lines. For each line, replace all
-occurences of find with replace."
+  "Loop through an array of strings, which is LINES. For each line, replace all
+occurences of FIND with REPLACE."
   )
 
 (defun license-arg (arg options)
@@ -215,8 +216,8 @@ occurences of find with replace."
                 (license-error-text err))))))
 
 (defmacro exactly-one ((one-form &optional none-form more-form) &rest vals)
-  "Returns one-form if exactly one of vals is true, none-form if none are true,
-and more-form if more than one are true."
+  "Returns ONE-FORM if exactly one of VALS is true, NONE-FORM if none are true,
+and MORE-FORM if more than one are true."
   (let ((value (gensym))
         (true-count (gensym)))
     `(loop for ,value in (list ,@vals)
@@ -227,7 +228,7 @@ and more-form if more than one are true."
                             ,none-form)))))
 
 (defun check-has-license (opts)
-  "Returns new version of opts, is destructive."
+  "Returns new version of OPTS, is destructive."
   (when (and (assoc-equal "license-name" opts)
              (assoc-equal "license-file" opts))
     (license-error "Cannot use both --license-name and --license-file"))
@@ -238,7 +239,7 @@ and more-form if more than one are true."
   opts)
 
 (defun check-has-filetype (opts)
-  "Returns new version of opts, is destructive."
+  "Returns new version of OPTS, is destructive."
   (when (and (assoc-equal "filetype-language" opts)
              (assoc-equal "filetype-regex" opts))
     (license-error "Cannot use both --filetype-language and --filetype-regex"))
@@ -248,7 +249,7 @@ and more-form if more than one are true."
   opts)
 
 (defun check-has-comment-type (opts)
-  "Returns new value of opts, is destructive."
+  "Returns new value of OPTS, is destructive."
   (exactly-one (nil
                 (progn (setf opts
                              (acons "auto-detect-comment-type" nil opts))
@@ -262,14 +263,14 @@ and more-form if more than one are true."
   opts)
 
 (defun verify-options (opts)
-  "Makes sure the options are consistent. Returns correct options if possible"
+  "Makes sure OPTS are consistent. Returns correct options if possible"
   (setf opts (check-has-license opts))
   (setf opts (check-has-filetype opts))
   (setf opts (check-has-comment-type opts))
   opts)
 
 (defun print-license-file (license-file)
-  "Returns t on success, nil on failure."
+  "Returns T on success, NIL on failure."
   (let ((license-lines (read-file-lines license-file)))
     (if license-lines
         (loop for line across license-lines
@@ -278,7 +279,7 @@ and more-form if more than one are true."
         nil)))
 
 (defun print-license (opts)
-  "Returns t on success, nil on failure."
+  "Returns T on success, NIL on failure."
   (let ((license (handler-case (get-license opts)
                    (license-error (err)
                      (format *error-output* "Cannot print license:~%~a~%"
@@ -289,9 +290,9 @@ and more-form if more than one are true."
         nil)))
 
 (defun process-args (remaining-args opts)
-  "Call after reading the options. For each argument in remaining-args, attempt
-to license the file or files that it points to. The list, options, is the alist
-of arguments and their values."
+  "Call after reading the options. For each argument in REMAINING-ARGS, attempt
+to license the file or files that it points to. The list, OPTS, is the alist of
+arguments and their values."
   (loop
      initially
        (when (assoc-equal "print-license" opts)

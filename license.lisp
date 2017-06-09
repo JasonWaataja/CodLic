@@ -1,10 +1,11 @@
 ;;;; license.lisp
+;;;; Information about licenses and their locations on the filesystem.
 
 (in-package #:codlic)
 
 (defun find-license-path (license-file)
-  "Uses *install-prefix* to find the full path to the license file with the
-given filename. For example, gplv3 would expand to *install-prefix/share/gplv3."
+  "Uses *INSTALL-PREFIX* to find the full path to the license file with the
+given filename. For example, gplv3 would expand to *INSTALL-PREFIX/share/gplv3."
   (merge-pathnames (make-pathname :directory '(:relative "share" "codlic" "licenses")
                                   :name license-file)
                    (uiop:ensure-directory-pathname *install-prefix*)))
@@ -23,4 +24,4 @@ given filename. For example, gplv3 would expand to *install-prefix/share/gplv3."
     license-table))
 
 (defparameter *license-table* (make-license-table)
-  "The table mapping license names to their files on the system.")
+  "The table mapping license names to their files on the filesystem.")

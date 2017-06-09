@@ -1,9 +1,10 @@
 ;;;; files.lisp
+;;;; File input and output.
 
 (in-package #:codlic)
 
 (defun read-file-lines (pathspec)
-  "Reads the lines in the given file, returns a vector with them on success, nil
+  "Reads the lines in the given file, returns a vector with them on success, NIL
 on failure."
   (with-open-file (reader pathspec :if-does-not-exist nil)
     (if reader
@@ -17,8 +18,8 @@ on failure."
            finally (return lines)))))
 
 (defun write-file-lines (pathspec lines-array)
-  "Writes each line in the array of lines to the file at pathspec. Overwrites
-the file if it exists. Returns t on success, nil on failure."
+  "Writes each line in the array of lines to the file at PATHSPEC. Overwrites
+the file if it exists. Returns T on success, NIL on failure."
   (with-open-file (writer pathspec :direction :output :if-exists :supersede)
     (loop for line across lines-array
        do (write-line line writer)

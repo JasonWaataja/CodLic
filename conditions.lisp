@@ -1,4 +1,5 @@
 ;;;; conditions.lisp
+;;;; Conditions and related functions for codlic.
 
 (in-package #:codlic)
 
@@ -9,8 +10,8 @@
   ((file :initarg :file :accessor file-license-error-file)))
 
 (defmacro fail-if-nil ((&rest forms) error-type &rest args)
-  "Checks each form in order. If any is nil, then throw an error constructed
-with error-type and args. For example (fail-if-nil (t) 'my-error :text
+  "Checks each form in order. If any is NIL, then throw an error constructed
+with ERROR-TYPE and ARGS. For example (fail-if-nil (t) 'my-error :text
 \"my-text\"). Returns the values of the forms if no condition is signalled."
   (let ((values (gensym))
         (current-value (gensym)))

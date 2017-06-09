@@ -1,4 +1,9 @@
 ;;;; comments.lisp
+;;;; Contains information about various comment types. A comment type is
+;;;; represented as a function that takes an array of input lines and returns a
+;;;; of output lines. This files also contains the map for mapping language
+;;;; names to filetypes and creating new comment types.
+
 
 (in-package #:codlic)
 

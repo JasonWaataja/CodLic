@@ -1,4 +1,6 @@
 ;;;; parameters.lisp
+;;;; Method to pass information from the build system, set these in an init
+;;;; file.
 
 (in-package #:codlic)
 
