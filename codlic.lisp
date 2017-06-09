@@ -18,6 +18,7 @@
     ("skip-file-on-error" :none nil)
     ("skip-shebang" :none nil)
     ("print-license" :none nil)
+    ("license-search" :required nil)
     ("license-replace" :required nil)))
 
 (defun assoc-equal (item alist)
@@ -190,6 +191,28 @@ OPTIONS. May signal a `license-error'."
                         :end (or pos (length string)))
        when pos do (write-string replacement out)
        while pos)))
+
+(defun replace-lines (lines part replacement)
+  "Goes through each line in the array LINES and replaces all instances of PART
+with REPLACEMENT."
+  (map 'vector
+       (lambda (line)
+         (replace-all line part replacement))
+       lines))
+
+(defun read-license-lines (license-file opts)
+  "Essentially calls READ-FILE-LINES to read the lines of LICENSE-FILE and
+return them. Also makes the necessary string replacements based on OPTS."
+  (let ((license-lines (read-file-lines license-file))
+        (search-opt (assoc-equal "license-search" opts))
+        (replace-opt (assoc-equal "license-replace" opts)))
+    (if search-opt
+        (replace-lines license-lines
+                       (cdr search-opt)
+                       (if replace-opt
+                           (cdr replace-opt)
+                           ""))
+        license-lines)))
 
 (defun license-arg (arg options)
   "Licenses an argument based on the given options."
