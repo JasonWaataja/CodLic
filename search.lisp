@@ -1,6 +1,8 @@
 ;;;; search.lisp
 ;;;; Finding and replacing strings in arrays of lines.
 
+(in-package #:codlic)
+
 (defun replace-all (string part replacement &key (test #'char=))
   "From the Common Lisp Cookbook, replaces instances of part with replacement."
   (with-output-to-string (out)
@@ -48,11 +50,10 @@ replace. The format of CONTROL-STRING is a colon-separated list of expressions
 with a search and replace part. The search and replace parts of a string are
 separated by a forward slash. All forward slashes and colons that aren't meant
 to be used as splitters should be escapped with a backslash. To insert a
-backslash, use two backslashes."
+backslash, use two backslashes. Other escaped characters are ignored."
   (let ((search-replace-forms (split-string control-string)))
     (loop for form in search-replace-forms
        for subforms = (split-string form "/")
-       do (format t "~a~%" subforms)
        ;; Yes, I know this is slow.
        when (= (length subforms) 2)
        collect (cons (first subforms) (second subforms)))))
