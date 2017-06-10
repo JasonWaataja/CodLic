@@ -13,4 +13,5 @@
                (:file "filetypes")
                (:file "license")
                (:file "comments")
+               (:file "search")
                (:file "codlic")))

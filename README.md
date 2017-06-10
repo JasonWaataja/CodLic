@@ -8,8 +8,8 @@ started a C++ version once but wanted to have fun.
 
 ## Installation
 codlic only runs on UNIX and Unix-like systems and building it requires a Common
-Lisp implementation. The only one that I've ever tried is sbcl and don't expect
-it to work with anything else. It can be installed in most distros.
+Lisp implementation. The only one that I've ever tried is sbcl and don't assume
+it will work with anything else. It can be installed in most distros.
 
 To install, simply run `make install` or `make install INSTALL_PREFIX=` with
 root privileges. Don't expect this makefile to behave like a normal one; it
@@ -22,7 +22,7 @@ come up with.
 
 ### Updating Library Dependencies
 The libraries bundled with the project may be out of date at some point. If you
-ever need to run them, navigate into the directory and run `qlot update`. You
+ever need to update them, navigate into the directory and run `qlot update`. You
 will have to install it with roswell or something, first.
 
 ## Usage
@@ -33,38 +33,44 @@ the comment type to use.
 
 You can specify the license with `--license-file` or `--license-name`. Using
 `--license-name` you can specify one of the included licenses such as `gplv3` or
-`mit`. Note, these are templates and you need to fill in things like copyright
-holder, program name, and year yourself. This can be done with --license-search
-and --license-replace. The license defaults to MIT.
+`mit`. Note, these licenses are templates. The relevant information needs to be
+filled in with the `--license-replace` option. This option takes a
+colon-separated list of pairs of string separated by `/`. You can escape these
+with a backslash. The license defaults to MIT. To license using the MIT license
+with the correct information, use `--license-name mit --license-replace
+'<copyright year>/2017:<copyright holder>/Your Name'`. To see the license before
+using it, pass the `--print-license` option.
 
-To specify what files to license, you can pass no options to attempt to license
-every file in a directory and will probably return an error when it cannot find
-the comment type for a file. One of the easiest options to use is
-`--auto-detect-comment-type` which does a lookup on some preset filetypes. You
-can specify individual comment languages with the `--comment-language` option to
-specify one of the presets, such as `c` or `lisp`.  You can also use custom
-comment types, such as python style with `--single-comment-string '#'` or C with
-`--opening-comment-string "/*"`, `--closing-comment-string " */"`, and
-`--continuation-comment-string " *"`.  Notice the leading spaces in the closing
-and continuation comment strings, this is so the formatting lines up.
+To determine what comment style to use, one of the easiest options to use is
+`--auto-detect-comment-type` which does a lookup on some preset filetypes. This
+option is used by default. You can specify individual comment languages with the
+`--comment-language` option to specify one of the presets, such as `c` or
+`lisp`.  You can also use custom comment types, such as python style with
+`--single-comment-string '#'` or C with `--opening-comment-string "/*"`,
+`--closing-comment-string " */"`, and `--continuation-comment-string " *"`.
+Notice the leading spaces in the closing and continuation comment strings, this
+is so the formatting lines up.
 
-To choose what files to license, simply pass files as arguments or directories
+To choose what files to license, simply pass files or directories as arguments
 with some selection options. One way to filter out files is to use the
 `--filetype-language` with a preset such as c or lisp. Another way is to use a
 regex. To license files that end in both `.c` and `.cc`, you can use
-`--filetype-regex '.*\.c|.*\.cc'` or `'.*\.cc?`.
+`--filetype-regex '.*\.c|.*\.cc'` or `'.*\.cc?`. By default, codlic attempts to
+license every file that is passed to it, but this will probably fail when
+licensing a directory when it cannot figure out what comment type to use.
 
 See `man codlic` for information on every option.
 
 ## Examples
-To license all C files in a directory with the MIT License, use
+License all C files in a directory with the MIT License:
 
 ```bash
 codlic --license-name mit --filetype-language c --comment-language c \
-	--license-search "<copyright year>" --license-replace 2017 my_dir
+	--license-replace "<copyright year>/2017:<copyright holder> Jason Waataja" \
+	my_dir
 ```
 
-To license the C++ files in a directory with the gplv3
+License all C++ files in a directory with the gplv3.
 
 ```bash
 cp /usr/local/share/codlic/license/gplv3 .
