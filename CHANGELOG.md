@@ -1,6 +1,16 @@
 # Change Log
 This project adheres to Semantic Versioning
 
+## [Unreleased]
+### Changed
+- Change directory structure, now has a src dir.
+
+### Fixed
+- Fix bug where it would crash when trying to run regex on pathname object
+  instead of string.
+- Fix mixup of closing and contiunation comment strings in the C comment type so
+  it would produce invalid syntax.
+
 ## [0.1.2] - 2017-06-12
 ### Added
 - Add --print-languages and --print-licenses which print a list of useful items
