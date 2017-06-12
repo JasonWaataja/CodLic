@@ -24,3 +24,13 @@ the file if it exists. Returns T on success, NIL on failure."
     (loop for line across lines-array
        do (write-line line writer)
        finally (return t))))
+
+(defun walk-directory (dirpath func)
+  "My own walking func, since I don't want to learn the UIOP one. This one
+purposefully doesn't follow symlinks because I don't want licensing to happen
+recursively. That's why it doesn't just use the DIRECTORY* function."
+  (loop for file in (uiop:directory-files dirpath)
+     do (funcall func file))
+  (loop for dir in (uiop:subdirectories dirpath) do
+       (funcall func dir)
+       (walk-directory dir func)))

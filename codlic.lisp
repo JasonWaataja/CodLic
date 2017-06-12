@@ -20,36 +20,6 @@
     ("print-license" :none nil)
     ("license-replace" :required nil)))
 
-(defun assoc-equal (item alist)
-  (assoc item alist :test #'equal))
-
-(defmacro acase ((cons-name alist &key else-form test) &rest test-forms)
-  "Switch statement for alists. For each test form, of the form (test-form
-  result-forms*), searches alist for test-form. In each case, if it is found,
-  then TEST-FORMS for that case are evaluated and returned. If no case matches
-  then ELSE-FORM is evaluated and returned."
-  ;; This is formed by going through the TEST-FORMS in reverse. Since a
-  ;; consecutive cond won't work (assoc would have to be run twice), a series of
-  ;; consecutive LET and IF statements must be used, but since the last one must
-  ;; end in ELSE-FORM it must be built in reverse.
-  (setf test-forms (nreverse test-forms))
-  (loop with final-form = '()
-     initially
-       (setf final-form
-             `(let ((,cons-name (assoc ,(first (first test-forms)) ,alist
-                                       :test ,test)))
-                (if ,cons-name
-                    (progn ,@(rest (first test-forms)))
-                    ,else-form)))
-     for test-form in (rest test-forms) do
-       (setf final-form
-             `(let ((,cons-name (assoc ,(first test-form) ,alist
-                                       :test ,test)))
-                (if ,cons-name
-                    (progn ,@(rest test-form))
-                    ,final-form)))
-     finally (return final-form)))
-
 (defun get-license (options)
   "Gets the correct license file for the given command line options"
   (acase (name-cons options
@@ -59,10 +29,9 @@
          ("license-file" (cdr name-cons))))
 
 (defun comment-type-for-file (path)
-  (loop for language being the hash-keys in *comment-types-table*
-     using (hash-value comment-type)
-     if (file-matches-language-p path language)
-     return comment-type
+  (loop for language being the hash-values in *languages-table*
+     if (regex-matches-p (language-filetype-regex language) path)
+     return (language-comment-type language)
      finally (return nil)))
 
 (defun get-composite-comment-type (options)
@@ -88,19 +57,9 @@ passed arguments. This can change based on the arg if auto-detection is used."
   (acase (comment-cons options
                        :else-form (get-composite-comment-type options)
                        :test #'equal)
-         ("comment-language" (gethash (cdr comment-cons) *comment-types-table*))
+         ("comment-language" (get-comment-type-for-language (cdr comment-cons)))
          ("auto-detect-comment-type" (comment-type-for-file file))
          ("single-comment-string" (make-single-comment-type (cdr comment-cons)))))
-
-(defun walk-directory (dirpath func)
-  "My own walking func, since I don't want to learn the UIOP one. This one
-purposefully doesn't follow symlinks because I don't want licensing to happen
-recursively. That's why it doesn't just use the DIRECTORY* function."
-  (loop for file in (uiop:directory-files dirpath)
-     do (funcall func file))
-  (loop for dir in (uiop:subdirectories dirpath) do
-       (funcall func dir)
-       (walk-directory dir func)))
 
 (defun should-license-p (file options)
   ;; If none of these options are present, license anything by default.
@@ -122,14 +81,6 @@ directory then it recursively finds files in it."
                               (push entry file-list))))
         (nreverse file-list))
       (list arg)))
-
-(defun has-prefix (string prefix)
-  "Returns if STRING begins with prefix."
-  (let ((str-length (length string))
-        (prefix-length (length prefix)))
-    (if (< str-length prefix-length)
-        nil
-        (string= string prefix :end1 prefix-length :end2 prefix-length))))
 
 (defun has-shebang (first-line)
   "Returns whether or not FIRST-LINE begins with \"#!\""
@@ -226,18 +177,6 @@ return them. Also makes the necessary string replacements based on OPTS."
                 "Warning, failed to license file \"~a\": ~a~%"
                 (file-license-error-file err)
                 (license-error-text err))))))
-
-(defmacro exactly-one ((one-form &optional none-form more-form) &rest vals)
-  "Returns ONE-FORM if exactly one of VALS is true, NONE-FORM if none are true,
-and MORE-FORM if more than one are true."
-  (let ((value (gensym))
-        (true-count (gensym)))
-    `(loop for ,value in (list ,@vals)
-        count ,value into ,true-count
-        if (> ,true-count 1) return ,more-form
-        finally (return (if (= ,true-count 1)
-                            ,one-form
-                            ,none-form)))))
 
 (defun check-has-license (opts)
   "Returns new version of OPTS, is destructive."
