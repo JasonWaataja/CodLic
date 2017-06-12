@@ -18,7 +18,9 @@
     ("skip-file-on-error" :none nil)
     ("skip-shebang" :none nil)
     ("print-license" :none nil)
-    ("license-replace" :required nil)))
+    ("license-replace" :required nil)
+    ("print-languages" :none nil)
+    ("print-licenses" :none nil)))
 
 (defun get-license (options)
   "Gets the correct license file for the given command line options"
@@ -240,14 +242,31 @@ return them. Also makes the necessary string replacements based on OPTS."
         (print-license-file license)
         nil)))
 
+(defun print-languages ()
+  "Prints each language and its filetype regex."
+  (loop for language-name being the hash-keys in *languages-table*
+     using (hash-value language)
+     do (format t "~a: ~a~%" language-name (language-filetype-regex language))))
+
+(defun print-licenses ()
+  "Prints each license and the path to find it."
+  (loop for license-name being the hash-keys in *license-table*
+     using (hash-value license-path)
+     do (format t "~a: ~a~%" license-name license-path)))
+
 (defun process-args (remaining-args opts)
   "Call after reading the options. For each argument in REMAINING-ARGS, attempt
 to license the file or files that it points to. The list, OPTS, is the alist of
 arguments and their values."
-  (loop
-     initially
+  (loop initially
        (when (assoc-equal "print-license" opts)
          (return (print-license opts)))
+       (when (assoc-equal "print-languages" opts)
+         (print-languages)
+         (return t))
+       (when (assoc-equal "print-licenses" opts)
+         (print-licenses)
+         (return t))
        (handler-case (setf opts (verify-options opts))
          (license-error (err)
            (format *error-output* "Invalid arguments.~%~a~%"
