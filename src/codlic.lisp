@@ -32,7 +32,8 @@
 
 (defun comment-type-for-file (path)
   (loop for language being the hash-values in *languages-table*
-     if (regex-matches-p (language-filetype-regex language) path)
+     with path-namestring = (namestring path)
+     if (regex-matches-p (language-filetype-regex language) path-namestring)
      return (language-comment-type language)
      finally (return nil)))
 
