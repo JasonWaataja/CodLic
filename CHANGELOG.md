@@ -1,7 +1,7 @@
 # Change Log
 This project adheres to Semantic Versioning
 
-## [Unreleased]
+## [0.1.2] - 2017-06-12
 ### Added
 - Add --print-languages and --print-licenses which print a list of useful items
   that can be used.
