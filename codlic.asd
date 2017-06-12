@@ -2,15 +2,16 @@
 
 (asdf:defsystem #:codlic
   :description "Describe codlic here"
-  :author "Your Name <your.name@example.com>"
-  :license "Specify license here"
+  :author "Jason Waataja <jasonswaataja@gmail.com>"
+  :license "GPLv3"
   :depends-on (#:getopt #:cl-ppcre)
   :serial t
   :components ((:file "package")
+               (:file "util")
                (:file "parameters")
                (:file "conditions")
                (:file "files")
                (:file "filetypes")
                (:file "license")
-               (:file "comments")
+               (:file "search")
                (:file "codlic")))
