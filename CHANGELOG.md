@@ -1,7 +1,7 @@
 # Change Log
 This project adheres to Semantic Versioning
 
-## [Unreleased]
+## [0.1.3] - 2017-06-12
 ### Changed
 - Change directory structure, now has a src dir.
 
