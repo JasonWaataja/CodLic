@@ -35,7 +35,7 @@ To choose what files to license, simply pass files as arguments or directories
 with some selection options. One way to filter out files is to use the
 --filetype-language with a preset such as c or lisp. Another way is to use a
 regex. To license files that end in both .c and .cc, you can use
---filetype-regex '.*\.c|.*\.cc' or '.*\.cc?. By default, codlic attempts to
+--filetype-regex '.*\\.c|.*\\.cc' or '.*\\.cc?'. By default, codlic attempts to
 license every file that is passed to it, but this will probably fail when
 licensing a directory when it cannot figure out what comment type to use.
 .SH OPTIONS
@@ -51,7 +51,7 @@ Use the given file as the header to add to code.
 Only license files with the given language. Options include c and lisp.
 .IP "--filetype-regex"
 Only license files that match the given perl-compatible regular expression. For
-example, to license all C and C++ files, use ".*\.c|.*\.cc" or ".*\.cc?".
+example, to license all C and C++ files, use ".*\\.c|.*\\.cc" or ".*\\.cc?".
 .IP "--comment-language"
 License files with the comment type associated with the given language. Options
 include c and lisp.
@@ -88,6 +88,34 @@ Do a search and replace on each line in the license file before using it. The
 string passed to this argument is of the form
 "search_string1/replace_string1:search_string2/replace_string2". It is a
 colon-separated list of search-replace pairs separated by a forward slash.
+.IP "--print-languages"
+Print the available languages and their filetype regexes. Each listed language
+has a corresponding comment type.
+.IP "--print-licenses"
+Print a list of built-in licenses and the path to their files on the filesystem.
+.SH EXAMPLES
+
+License all C files in a directory with the MIT License:
+
+.nf
+codlic --license-name mit --filetype-language c --comment-language c \\
+.br
+	--license-replace "<copyright year>/2017:<copyright holder> Jason Waataja" \\
+.br
+	my_dir
+.fi
+
+License all C++ files in a directory with the gplv3.
+
+.nf
+cp /usr/local/share/codlic/license/gplv3 .
+.br
+sed -i 's/Foobar/your-project/g' gplv3
+.br
+codlic --license-file ./gplv3 --filetype-regex '.*\\.cc' \\
+.br
+	--auto-detect-comment-type my_dir
+.fi
 .SH BUGS
 There's a lot of features I know would make it work much better. I might add
 them some day.
