@@ -2,6 +2,14 @@
 This project adheres to Semantic Versioning
 
 ## [Unreleased]
+### Added
+- Add --print-languages and --print-licenses which print a list of useful items
+  that can be used.
+
+### Changed
+- Change filetype regexes and comment types to use one internal table based on
+  language name.
+
 ### Fixed
 - Fix some errors in documentation.
 
