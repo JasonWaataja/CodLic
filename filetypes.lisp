@@ -81,7 +81,7 @@
          (return output-lines))))
 
 (defun make-languages-table ()
-  "Creates the langauges table."
+  "Creates the languages table."
   (let ((language-table (make-hash-table :test #'equal)))
     (macrolet ((add-language-hashes (&body hash-forms)
                                     (loop for hash-form in hash-forms

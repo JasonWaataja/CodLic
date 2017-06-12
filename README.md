@@ -61,6 +61,19 @@ licensing a directory when it cannot figure out what comment type to use.
 
 See `man codlic` for information on every option.
 
+## Contributing
+### Adding Languages
+To add another language or update an existing one, edit the function
+MAKE-LANGUAGES-TABLE in `filetypes.lisp`. It should be pretty simple using
+existing patterns, and the functions MAKE-SINGLE-COMMENT-TYPE and
+MAKE-COMPOSITE-COMMENT-TYPE.
+
+### Adding Licenses
+To add a license, place the license text in a file in the `licenses`
+subdirectory. Then, update the function MAKE-LICENSE-TABLE in the file
+`license.lisp` so that it knows both the license name and filename. Finally, add
+an installation instruction to the Makefile next to the other license files.
+
 ## Examples
 License all C files in a directory with the MIT License:
 
