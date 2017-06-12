@@ -92,8 +92,8 @@
                                        finally (return `(progn ,@set-forms)))))
       (add-language-hashes
         ("c" ".*\\.c" (make-composite-comment-type "/*"
-                                                   " *"
-                                                   " */"))
+                                                   " */"
+                                                   " *"))
         ("cpp" ".*\\.cc|.*\\.cpp|.*\\.C" (make-single-comment-type "//"))
         ("lisp" ".*\\.lisp|.*\\.cl" (make-single-comment-type ";;"))
         ("java" ".*\\.java" (make-single-comment-type "//"))
