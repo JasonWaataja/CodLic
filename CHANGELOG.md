@@ -1,6 +1,10 @@
 # Change Log
 This project adheres to Semantic Versioning
 
+## [Unreleased]
+### Changed
+- Make some error messages include file names.
+
 ## [0.1.3] - 2017-06-12
 ### Changed
 - Change directory structure, now has a src dir.
