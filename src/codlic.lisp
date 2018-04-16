@@ -17,7 +17,7 @@
     ("non-blank-first-line" :none nil)
     ("skip-file-on-error" :none nil)
     ("skip-shebang" :none nil)
-    ("print-license" :none nil)
+    ("print-contents" :none nil)
     ("license-replace" :required nil)
     ("print-languages" :none nil)
     ("print-licenses" :none nil)))
@@ -266,7 +266,7 @@ return them. Also makes the necessary string replacements based on OPTS."
 to license the file or files that it points to. The list, OPTS, is the alist of
 arguments and their values."
   (loop initially
-       (when (assoc-equal "print-license" opts)
+       (when (assoc-equal "print-contents" opts)
          (return (print-license opts)))
        (when (assoc-equal "print-languages" opts)
          (print-languages)
