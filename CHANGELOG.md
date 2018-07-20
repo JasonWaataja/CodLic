@@ -3,6 +3,8 @@ This project adheres to Semantic Versioning
 
 ## [Unreleased]
 ### Changed
+- Completely change build system. It now actually works, adds dependency on
+  `buildapp`.
 - Make some error messages include file names.
 
 ## [0.1.3] - 2017-06-12
