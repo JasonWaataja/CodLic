@@ -1,7 +1,7 @@
 # Change Log
 This project adheres to Semantic Versioning
 
-## [Unreleased]
+## [0.1.4] - 2018-07-20
 ### Changed
 - Completely change build system. It now actually works, adds dependency on
   `buildapp`.

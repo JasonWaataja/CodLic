@@ -5,7 +5,7 @@
   :author "Jason Waataja <jasonswaataja@gmail.com>"
   :license "GPLv3"
   :homepage "https://github.com/JasonWaataja/codlic"
-  :version "0.1.3"
+  :version "0.1.4"
   :depends-on (#:getopt #:cl-ppcre)
   :pathname "src"
   :components ((:file "package")
