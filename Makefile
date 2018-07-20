@@ -1,5 +1,5 @@
 INSTALL_PREFIX ?= /usr/local
-INSTALL_BIN = ${INSTALL_PREFIX}/bin
+INSTALL_BIN = $(INSTALL_PREFIX)/bin
 
 # Binary name
 TARGET = codlic
@@ -55,8 +55,9 @@ BUILDAPP = buildapp
 LISP = sbcl
 
 install:
-	mkdir -p ${INSTALL_BIN}
-	install -Dm755 ${OUTDIR}/${TARGET} ${INSTALL_BIN}/${TARGET}
-	install -Dm755 licenses/gplv3 ${INSTALL_PREFIX}/share/codlic/licenses/gplv3
-	install -Dm755 licenses/mit ${INSTALL_PREFIX}/share/codlic/licenses/mit
-	install -Dm644 man/codlic.1 ${INSTALL_PREFIX}/share/man/man1
+	mkdir -p $(INSTALL_BIN)
+	mkdir -p $(INSTALL_PREFIX)/share/codlic/licenses
+	install -Dm755 $(OUTDIR)/$(TARGET) $(INSTALL_BIN)/$(TARGET)
+	install -Dm755 licenses/gplv3 $(INSTALL_PREFIX)/share/codlic/licenses/gplv3
+	install -Dm755 licenses/mit $(INSTALL_PREFIX)/share/codlic/licenses/mit
+	install -Dm644 man/codlic.1 $(INSTALL_PREFIX)/share/man/man1
