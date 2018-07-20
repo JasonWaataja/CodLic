@@ -56,6 +56,7 @@ LISP = sbcl
 
 install:
 	mkdir -p ${INSTALL_BIN}
+	mkdir -p ${INSTALL_PREFIX}/share/codlic/licenses
 	install -Dm755 ${OUTDIR}/${TARGET} ${INSTALL_BIN}/${TARGET}
 	install -Dm755 licenses/gplv3 ${INSTALL_PREFIX}/share/codlic/licenses/gplv3
 	install -Dm755 licenses/mit ${INSTALL_PREFIX}/share/codlic/licenses/mit
