@@ -1,6 +1,12 @@
 # Change Log
 This project adheres to Semantic Versioning
 
+## [0.1.4] - 2018-07-20
+### Changed
+- Completely change build system. It now actually works, adds dependency on
+  `buildapp`.
+- Make some error messages include file names.
+
 ## [0.1.3] - 2017-06-12
 ### Changed
 - Change directory structure, now has a src dir.

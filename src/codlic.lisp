@@ -17,7 +17,7 @@
     ("non-blank-first-line" :none nil)
     ("skip-file-on-error" :none nil)
     ("skip-shebang" :none nil)
-    ("print-license" :none nil)
+    ("print-contents" :none nil)
     ("license-replace" :required nil)
     ("print-languages" :none nil)
     ("print-licenses" :none nil)))
@@ -27,8 +27,8 @@
   (acase (name-cons options
                     :test #'equal
                     :else-form (license-error "No license, use --license-name or --license-file."))
-         ("license-name" (gethash (cdr name-cons) *license-table*))
-         ("license-file" (cdr name-cons))))
+    ("license-name" (gethash (cdr name-cons) *license-table*))
+    ("license-file" (cdr name-cons))))
 
 (defun comment-type-for-file (path)
   (loop for language being the hash-values in *languages-table*
@@ -60,16 +60,16 @@ passed arguments. This can change based on the arg if auto-detection is used."
   (acase (comment-cons options
                        :else-form (get-composite-comment-type options)
                        :test #'equal)
-         ("comment-language" (get-comment-type-for-language (cdr comment-cons)))
-         ("auto-detect-comment-type" (comment-type-for-file file))
-         ("single-comment-string" (make-single-comment-type (cdr comment-cons)))))
+    ("comment-language" (get-comment-type-for-language (cdr comment-cons)))
+    ("auto-detect-comment-type" (comment-type-for-file file))
+    ("single-comment-string" (make-single-comment-type (cdr comment-cons)))))
 
 (defun should-license-p (file options)
   ;; If none of these options are present, license anything by default.
   (acase (license-cons options :else-form t :test #'equal)
-         ("filetype-language" (file-matches-language-p file
-                                                       (cdr license-cons)))
-         ("filetype-regex" (regex-matches-p (cdr license-cons)
+    ("filetype-language" (file-matches-language-p file
+                                                  (cdr license-cons)))
+    ("filetype-regex" (regex-matches-p (cdr license-cons)
                                             file))))
 
 (defun get-file-list (arg options)
@@ -116,11 +116,15 @@ OPTIONS. May signal a `license-error'."
     (let ((comment-type
            (fail-if-nil ((get-comment-type file options))
                         'license-error
-                        :text "Failed to get comment type for file."))
+                        :text (format nil
+                                      "Failed to get comment type for file: ~a."
+                                      (namestring file))))
           (input-lines
            (fail-if-nil ((read-file-lines file))
                         'license-error
-                        :text "Failed to read input file.")))
+                        :text (format nil
+                                      "Failed to read input file: ~a."
+                                      (namestring file)))))
       (fail-if-nil ((write-file-lines file
                                       (create-output-lines
                                        input-lines
@@ -128,7 +132,9 @@ OPTIONS. May signal a `license-error'."
                                        comment-type
                                        options)))
                    'license-error
-                   :text "Failed to write to file."))))
+                   :text (format nil
+                                 "Failed to write to file: ~a."
+                                 (namestring file))))))
 
 (defun read-license-lines (license-file opts)
   "Essentially calls READ-FILE-LINES to read the lines of LICENSE-FILE and
@@ -260,7 +266,7 @@ return them. Also makes the necessary string replacements based on OPTS."
 to license the file or files that it points to. The list, OPTS, is the alist of
 arguments and their values."
   (loop initially
-       (when (assoc-equal "print-license" opts)
+       (when (assoc-equal "print-contents" opts)
          (return (print-license opts)))
        (when (assoc-equal "print-languages" opts)
          (print-languages)
@@ -287,15 +293,3 @@ arguments and their values."
                                       (license-error-text err))
                         (return nil)))
      finally (return t)))
-
-(defun main (argv)
-  (multiple-value-bind (remaining-args
-                        opts
-                        unknown-opts)
-      (getopt:getopt argv *cmd-options*)
-    (cond (unknown-opts (format *error-output*
-                                "Failed to parse option~p ~{\"~a\"~^, ~}~%"
-                                (length unknown-opts)
-                                unknown-opts)
-                        nil)
-          (t (process-args remaining-args opts)))))

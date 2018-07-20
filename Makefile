@@ -1,26 +1,63 @@
 INSTALL_PREFIX ?= /usr/local
-INSTALL_BIN = ${INSTALL_PREFIX}/bin
-INSTALL_IMAGE = ${INSTALL_PREFIX}/lib/common-lisp/images
-CL_LAUNCH ?= ./cl-launch.sh
-EXEC=codlic
-IMAGE=${EXEC}.image
-EVAL_FORM = (defparameter *install-prefix* "${INSTALL_PREFIX}") \
-			(load "setup.lisp")
-CURRENT_DIR = $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
+INSTALL_BIN = $(INSTALL_PREFIX)/bin
 
-install_image:
-	mkdir -p ${INSTALL_IMAGE}
-	${CL_LAUNCH} -e '${EVAL_FORM}' -d "${INSTALL_IMAGE}/${IMAGE}"
+# Binary name
+TARGET = codlic
 
-install: install_image
-	mkdir -p ${INSTALL_BIN}
-	${CL_LAUNCH} -m ${INSTALL_IMAGE}/${IMAGE} -p codlic \
-		-E main -o ${INSTALL_BIN}/${EXEC}
-	install -Dm755 licenses/gplv3 ${INSTALL_PREFIX}/share/codlic/licenses/gplv3
-	install -Dm755 licenses/mit ${INSTALL_PREFIX}/share/codlic/licenses/mit
-	install -Dm644 man/codlic.1 ${INSTALL_PREFIX}/share/man/man1
+# Quicklisp system to load
+QL_SYSTEM = codlic
 
-# Requires the qlot program. Updates the libraries stored in the quicklisp
-# directory.
-update_dependencies:
-	qlot update
+#StartCut
+# Flags for manifest build
+MANIFEST_FLAGS =  --no-sysinit
+MANIFEST_FLAGS += --no-userinit
+MANIFEST_FLAGS += --load $(SRCDIR)/prep-quicklisp.lisp
+MANIFEST_FLAGS += --eval '(ql:quickload :qlot)'
+MANIFEST_FLAGS += --eval '(qlot:install :$(QL_SYSTEM))'
+MANIFEST_FLAGS += --eval '(qlot:quickload :$(QL_SYSTEM))'
+MANIFEST_FLAGS += --eval '(qlot:with-local-quicklisp (:$(QL_SYSTEM)) (ql:write-asdf-manifest-file \#P"$(MANIFEST)" :if-exists :supersede :exclude-local-projects nil))'
+MANIFEST_FLAGS += --eval '(uiop:quit)'
+#EndCut
+
+# Buildapp settings
+B_FLAGS =  --output $(OUTDIR)/$(TARGET)
+B_FLAGS += --manifest-file $(MANIFEST)
+B_FLAGS += --asdf-path $(CURDIR)/
+B_FLAGS += --load-system $(QL_SYSTEM)
+B_FLAGS += --entry $(QL_SYSTEM):main
+
+# Location: Source files
+SRCDIR = $(CURDIR)/src
+
+# Location: Build output
+OUTDIR = $(CURDIR)/builds
+
+# Location: Manifest
+MANIFEST = quicklisp-manifest.txt
+
+all: build_manifest build_app
+
+build_manifest:
+	-mkdir $(OUTDIR)
+	$(LISP) $(MANIFEST_FLAGS)
+
+build_app:
+	$(BUILDAPP) $(B_FLAGS)
+
+.PHONY: clean
+clean:
+	-rm $(OUTDIR)/*
+	-rm $(MANIFEST) $(BUILDLOG)
+
+# Applications
+SHELL = /bin/sh
+BUILDAPP = buildapp
+LISP = sbcl
+
+install:
+	mkdir -p $(INSTALL_BIN)
+	mkdir -p $(INSTALL_PREFIX)/share/codlic/licenses
+	install -Dm755 $(OUTDIR)/$(TARGET) $(INSTALL_BIN)/$(TARGET)
+	install -Dm755 licenses/gplv3 $(INSTALL_PREFIX)/share/codlic/licenses/gplv3
+	install -Dm755 licenses/mit $(INSTALL_PREFIX)/share/codlic/licenses/mit
+	install -Dm644 man/codlic.1 $(INSTALL_PREFIX)/share/man/man1

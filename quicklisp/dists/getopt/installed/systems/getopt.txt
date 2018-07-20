@@ -1,1 +1,0 @@
-dists/getopt/software/getopt-20150923-git/getopt.asd
