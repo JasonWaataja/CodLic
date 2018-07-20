@@ -1,12 +1,12 @@
 ("quicklisp" .
  (:class qlot.source.ql:source-ql-all
   :initargs (:project-name "quicklisp" :%version :latest)
-  :version "2017-05-16"))
+  :version "2018-07-11"))
 ("getopt" .
  (:class qlot.source.ql:source-ql
   :initargs (:project-name "getopt" :%version :latest)
-  :version "ql-2017-05-16"))
+  :version "ql-2018-07-11"))
 ("cl-ppcre" .
  (:class qlot.source.ql:source-ql
   :initargs (:project-name "cl-ppcre" :%version :latest)
-  :version "ql-2017-05-16"))
+  :version "ql-2018-07-11"))
