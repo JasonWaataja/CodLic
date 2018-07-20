@@ -1,5 +1,0 @@
-name: getopt
-version: ql-2018-07-11
-distinfo-subscription-url: qlot://localhost/getopt.txt
-release-index-url: qlot://localhost/getopt/ql-2018-07-11/releases.txt
-system-index-url: qlot://localhost/getopt/ql-2018-07-11/systems.txt

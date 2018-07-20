@@ -1,2 +1,0 @@
-# project url size file-md5 content-sha1 prefix [system-file1..system-fileN]
-cl-ppcre http://beta.quicklisp.org/archive/cl-ppcre/2017-12-27/cl-ppcre-20171227-git.tgz 154557 9d8ce62ef1a71a5e1e144a31be698d8c 3d57f1e446e4894097acebf36d52978ddaa62531 cl-ppcre-20171227-git cl-ppcre-unicode.asd cl-ppcre.asd

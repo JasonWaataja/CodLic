@@ -1,5 +1,0 @@
-name: cl-ppcre
-version: ql-2018-07-11
-distinfo-subscription-url: qlot://localhost/cl-ppcre.txt
-release-index-url: qlot://localhost/cl-ppcre/ql-2018-07-11/releases.txt
-system-index-url: qlot://localhost/cl-ppcre/ql-2018-07-11/systems.txt
